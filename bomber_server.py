@@ -5,6 +5,8 @@
 from model import *
 from view import *
 from network import *
+import socket
+import select
 import sys
 import pygame
 

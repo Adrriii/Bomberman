@@ -6,6 +6,7 @@ from model import *
 from view import *
 from keyboard import *
 from network import *
+import socket
 import sys
 import pygame
 
