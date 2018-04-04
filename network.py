@@ -15,6 +15,10 @@ class NetworkServerController:
         self.model = model
         self.port = port
 
+        # Nicks -> key:"remote_addr+remote_port" -> nickname string
+        # Dictionnary with all users' nicknames
+        self.nicks = {}
+
         # Socket creation
         sock = socket.socket(socket.AF_INET6,socket.SOCK_STREAM,0)
         sock.setsockopt(1,socket.SO_REUSEADDR,1024) # for testing
@@ -41,9 +45,12 @@ class NetworkServerController:
                 if data:
                     # Handle user command
                     message = data.decode()
-
-
                     print(user+": "+message)
+
+                    # The user is joining
+                    if(message.startswith("JOIN ")):
+                        self.changeNickname(s,message)
+                    
                 else:
                     # Handle brutal disconnection
                     print(user+" has disconnected unexpectedly.")
@@ -61,6 +68,17 @@ class NetworkServerController:
         print("A new player has connected.")
 
         return sockets
+
+    def changeNickname(self,s,message):
+        uid = self.uid_from_socket(s)
+
+        # Only take the decoded string data without NICK and \n
+        nick = message[5:]
+        # Add it to the dictionnary with the remote address as the key
+        self.nicks[uid] = nick
+
+        print(uid+" has a new nickname: "+nick)
+
 
 ################################################################################
 #                          NETWORK CLIENT CONTROLLER                           #
