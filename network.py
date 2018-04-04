@@ -93,6 +93,10 @@ class NetworkServerController:
 
         s.send("OK".encode())
 
+        char = self.model.look(nick)
+
+        self.tell_clients("NEWP "+nick+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n",[s])
+
         print(uid+" has a new nickname: "+nick)
 
     def sendMap(self,s):
@@ -103,11 +107,12 @@ class NetworkServerController:
         direction = message[5:]
         self.model.move_character(nick,int(direction))
 
-        char = self.model.look(nick)
+        self.tell_clients("MOVP "+nick+" "+str(direction)+"\n",[s])
 
+    def tell_clients(self,message,ignore=[]):
         for d in self.sockets:
-            if(d != s and d != self.sockets[0]):
-                d.send(("NEWP "+nick+" "+char.pos.x+" "+char.pos.y).encode())
+            if(d not in ignore and d != self.sockets[0]):
+                d.send(message.encode())
 
 
 
@@ -127,7 +132,6 @@ class NetworkClientController:
         s.connect((self.host,self.port))
 
         self.server = s
-
         self.server.send(("JOIN "+self.nickname).encode())
         data = self.server.recv(1500)
 
@@ -164,5 +168,13 @@ class NetworkClientController:
     # time event
 
     def tick(self, dt):
-        # ...
+        # Check if some data has been sent by the server
+        ready = select.select([self.server], [], [], dt/1000)
+
+        if ready[0]:
+            data = self.server.recv(1500)
+
+            if data:
+                message = data.decode()
+                print(message)
         return True

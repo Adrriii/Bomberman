@@ -6,6 +6,7 @@ from model import *
 from view import *
 from keyboard import *
 from network import *
+import threading
 import socket
 import sys
 import pygame
@@ -44,9 +45,9 @@ while True:
     # make sure game doesn't run at more than FPS frames per second
     dt = clock.tick(FPS)
     if not kb.tick(dt): break
-    if not client.tick(dt): break
     model.tick(dt)
     view.tick(dt)
+    threading.Thread(None, client.tick,None ,(dt,)).start()
 
 # quit
 print("Game Over!")
