@@ -21,7 +21,7 @@ class NetworkServerController:
 
         # Socket creation
         sock = socket.socket(socket.AF_INET6,socket.SOCK_STREAM,0)
-        sock.setsockopt(1,socket.SO_REUSEADDR,1024) # for testing
+        # sock.setsockopt(1,socket.SO_REUSEADDR,1024) # for testing
         sock.bind(('',self.port))
         sock.listen(1)
 
@@ -97,10 +97,23 @@ class NetworkServerController:
 
         self.tell_clients("NEWP "+nick+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n",[s])
 
+        s.send(("WELC "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+" "+self.model.mappath+"\n").encode())
+
+        # Tell about other players
+        for p in self.nicks.values():
+            if(p != nick):
+                char = self.model.look(p)
+                if char:
+                    s.send(("NEWP "+p+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n").encode())
+
         print(uid+" has a new nickname: "+nick)
 
     def sendMap(self,s):
         s.send((self.model.mappath).encode())
+
+    def drop_bomb(self,s):
+        nick = self.nicks[self.uid_from_socket(s)]
+        s.send(("DROP "+nick+"\n").encode())
 
     def moveCharacter(self,s,message):
         nick = self.nicks[self.uid_from_socket(s)]
@@ -110,6 +123,7 @@ class NetworkServerController:
         self.tell_clients("MOVP "+nick+" "+str(direction)+"\n",[s])
 
     def tell_clients(self,message,ignore=[]):
+        print(message)
         for d in self.sockets:
             if(d not in ignore and d != self.sockets[0]):
                 d.send(message.encode())
@@ -127,6 +141,7 @@ class NetworkClientController:
         self.host = host
         self.port = port
         self.nickname = nickname
+        self.ready = False
 
         s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         s.connect((self.host,self.port))
@@ -137,7 +152,7 @@ class NetworkClientController:
 
 
 
-    # keyboard events
+    # keyboard events and communication with the server
 
     def keyboard_quit(self):
         print("=> event \"quit\"")
@@ -145,6 +160,7 @@ class NetworkClientController:
 
     def keyboard_move_character(self, direction):
         print("=> event \"keyboard move direction\" {}".format(DIRECTIONS_STR[direction]))
+        self.model.move_character(self.nickname,direction)
         self.send_action("MOVE "+str(direction))
         return True
 
@@ -152,15 +168,6 @@ class NetworkClientController:
         print("=> event \"keyboard drop bomb\"")
         self.send_action("DROP")
         return True
-
-    def load_map(self):
-        self.server.send("MAP".encode())
-        data = self.server.recv(1500)
-
-        if data:
-            self.model.load_map(data.decode())
-        else:
-            print("Failed to retrieve map from server.")
 
     def send_action(self,action):
         self.server.send(action.encode())
@@ -177,4 +184,52 @@ class NetworkClientController:
             if data:
                 message = data.decode()
                 print(message)
+
+                orders = message.split("\n")
+
+                for line in orders:
+                    print("read: "+line)
+                    # New user is joining
+                    if(line.startswith("NEWP ")):
+                        self.add_character(line)
+
+                    # Another user is moving
+                    if(line.startswith("MOVP")):
+                        self.move_character(line)
+
+                    # Another user drops a bomb
+                    if(line.startswith("DROP ")):
+                        self.drop_bomb(line)
+
+                    # The server is welcoming with map and pos
+                    if(line.startswith("WELC ")):
+                        self.arrive(line)
+
+        return True
+
+    def arrive(self,message):
+        print("Arriving")
+        parts = message.split(" ")
+        path = parts[4]
+        self.model.load_map(path)
+        self.ready = True
+        self.model.add_character(self.nickname, True, int(parts[1]),[int(parts[2]),int(parts[3])])
+
+    def add_character(self,message):
+        # Split the message into arguments
+        parts = message.split(" ")
+
+        is_me = False
+        if(self.nickname == parts[1]):
+            is_me = True
+
+        y = parts[4].split("\n")[0]
+        # Add the character to the model
+        self.model.add_character(parts[1], is_me, int(parts[2]),[int(parts[3]),int(y)])
+
+    def move_character(self,message):
+        parts = message.split(" ")
+        self.model.move_character(parts[1], int(parts[2]))
+
+    def drop_bomb(self,message):
         return True

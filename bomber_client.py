@@ -35,9 +35,14 @@ clock = pygame.time.Clock()
 model = Model()
 
 client = NetworkClientController(model, host, port, nickname)
-client.load_map()
 
 kb = KeyboardController(client)
+
+# Run first tick for gathering info before display
+threading.Thread(None, client.tick,None ,(1000,)).start()
+
+while(not client.ready):
+    i = None
 
 view = GraphicView(model, nickname)
 # main loop
