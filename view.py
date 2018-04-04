@@ -10,7 +10,7 @@ import pygame
 
 ### Constants ###
 
-FPS = 30
+FPS = 60
 WIN_TITLE = "Bomber Man"
 SPRITE_SIZE = 30 # 30x30 pixels
 YELLOW = (255, 255, 0)
@@ -26,7 +26,7 @@ SPRITE_BOMB = "images/misc/bomb.png"
 SPRITE_FIRE = "images/misc/fire.png"
 SPRITE_FRUITS = [ "images/misc/banana.png", "images/misc/cherry.png" ]
 SPRITE_DK = [ "images/dk/left.png", "images/dk/right.png", "images/dk/up.png", "images/dk/down.png" ]
-SPRITE_ZELDA = [ "images/zelda/left.png", "images/zelda/right.png", "images/zelda/up.png", "images/zelda/down.png" ]
+SPRITE_LINK = [ "images/link/left.png", "images/link/right.png", "images/link/up.png", "images/link/down.png" ]
 SPRITE_BATMAN = [ "images/batman/left.png", "images/batman/right.png", "images/batman/up.png", "images/batman/down.png" ]
 
 ### Class PyGameView ###
@@ -48,9 +48,9 @@ class GraphicView:
         self.sprite_bomb = pygame.image.load(SPRITE_BOMB).convert_alpha()
         self.sprite_fire = pygame.image.load(SPRITE_FIRE).convert_alpha()
         sprite_dk = [ pygame.image.load(sprite).convert_alpha() for sprite in SPRITE_DK ]
-        sprite_zelda = [ pygame.image.load(sprite).convert_alpha() for sprite in SPRITE_ZELDA ]
+        sprite_link = [ pygame.image.load(sprite).convert_alpha() for sprite in SPRITE_LINK ]
         sprite_batman = [ pygame.image.load(sprite).convert_alpha() for sprite in SPRITE_BATMAN ]
-        self.sprite_characters = [sprite_dk, sprite_zelda, sprite_batman]
+        self.sprite_characters = [sprite_dk, sprite_link, sprite_batman]
         # init view
         pygame.display.set_icon(self.sprite_bomb)
         title = WIN_TITLE

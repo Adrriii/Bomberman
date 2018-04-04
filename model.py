@@ -33,10 +33,10 @@ FRUITS_STR = ["banana", "cherry"]
 
 # character
 DK = 0
-ZELDA = 1
+LINK = 1
 BATMAN = 2
-CHARACTERS = [DK, ZELDA, BATMAN]
-CHARACTERS_STR = ["dk", "zelda", "batman"]
+CHARACTERS = [DK, LINK, BATMAN]
+CHARACTERS_STR = ["dk", "link", "batman"]
 HEALTH = 50
 MAX_RANGE = 5
 COUNTDOWN = 5
