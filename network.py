@@ -50,7 +50,11 @@ class NetworkServerController:
                     # The user is joining
                     if(message.startswith("JOIN ")):
                         self.changeNickname(s,message)
-                    
+
+                    # The user is requesting the server map
+                    if(message.startswith("MAP")):
+                        self.sendMap(s)
+
                 else:
                     # Handle brutal disconnection
                     print(user+" has disconnected unexpectedly.")
@@ -72,12 +76,16 @@ class NetworkServerController:
     def changeNickname(self,s,message):
         uid = self.uid_from_socket(s)
 
-        # Only take the decoded string data without NICK and \n
+        # Only take the decoded string data without JOIN
         nick = message[5:]
-        # Add it to the dictionnary with the remote address as the key
+        # Add it to the dictionnary with the UID as the key
         self.nicks[uid] = nick
+        s.send("OK".encode())
 
         print(uid+" has a new nickname: "+nick)
+
+    def sendMap(self,s):
+        s.send((self.model.mappath).encode())
 
 
 ################################################################################
@@ -98,6 +106,7 @@ class NetworkClientController:
         self.server = s
 
         self.server.send(("JOIN "+self.nickname).encode())
+        data = self.server.recv(1500)
 
 
 
@@ -116,6 +125,15 @@ class NetworkClientController:
         print("=> event \"keyboard drop bomb\"")
         # ...
         return True
+
+    def load_map(self):
+        self.server.send("MAP".encode())
+        data = self.server.recv(1500)
+
+        if data:
+            self.model.load_map(data.decode())
+        else:
+            print("Failed to retrieve map from server.")
 
     # time event
 

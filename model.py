@@ -195,6 +195,7 @@ class Model:
 
     # load map from file
     def load_map(self, filename):
+        self.mappath = filename
         self.map.load(filename)
         print("=> load map \"{}\" of size {}x{}".format(filename, self.map.width, self.map.height))
 

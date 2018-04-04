@@ -30,12 +30,15 @@ nickname = sys.argv[3]
 pygame.display.init()
 pygame.font.init()
 clock = pygame.time.Clock()
+
 model = Model()
-model.load_map(DEFAULT_MAP)
-view = GraphicView(model, nickname)
+
 client = NetworkClientController(model, host, port, nickname)
+client.load_map()
+
 kb = KeyboardController(client)
 
+view = GraphicView(model, nickname)
 # main loop
 while True:
     # make sure game doesn't run at more than FPS frames per second
