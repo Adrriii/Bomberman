@@ -55,6 +55,14 @@ class NetworkServerController:
                     if(message.startswith("MAP")):
                         self.sendMap(s)
 
+                    # The user is requesting to move
+                    if(message.startswith("MOVE")):
+                        self.moveCharacter(s, message)
+
+                    # The user is requesting to drop a bomb
+                    if(message.startswith("DROP")):
+                        self.dropBomb(s)
+
                 else:
                     # Handle brutal disconnection
                     print(user+" has disconnected unexpectedly.")
@@ -80,12 +88,27 @@ class NetworkServerController:
         nick = message[5:]
         # Add it to the dictionnary with the UID as the key
         self.nicks[uid] = nick
+
+        self.model.add_character(nick)
+
         s.send("OK".encode())
 
         print(uid+" has a new nickname: "+nick)
 
     def sendMap(self,s):
         s.send((self.model.mappath).encode())
+
+    def moveCharacter(self,s,message):
+        nick = self.nicks[self.uid_from_socket(s)]
+        direction = message[5:]
+        self.model.move_character(nick,int(direction))
+
+        char = self.model.look(nick)
+
+        for d in self.sockets:
+            if(d != s and d != self.sockets[0]):
+                d.send(("NEWP "+nick+" "+char.pos.x+" "+char.pos.y).encode())
+
 
 
 ################################################################################
@@ -118,12 +141,12 @@ class NetworkClientController:
 
     def keyboard_move_character(self, direction):
         print("=> event \"keyboard move direction\" {}".format(DIRECTIONS_STR[direction]))
-        # ...
+        self.send_action("MOVE "+str(direction))
         return True
 
     def keyboard_drop_bomb(self):
         print("=> event \"keyboard drop bomb\"")
-        # ...
+        self.send_action("DROP")
         return True
 
     def load_map(self):
@@ -134,6 +157,9 @@ class NetworkClientController:
             self.model.load_map(data.decode())
         else:
             print("Failed to retrieve map from server.")
+
+    def send_action(self,action):
+        self.server.send(action.encode())
 
     # time event
 
