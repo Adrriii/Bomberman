@@ -21,7 +21,7 @@ class NetworkServerController:
 
         # Socket creation
         sock = socket.socket(socket.AF_INET6,socket.SOCK_STREAM,0)
-        # sock.setsockopt(1,socket.SO_REUSEADDR,1024) # for testing
+        sock.setsockopt(1,socket.SO_REUSEADDR,1024) # for testing
         sock.bind(('',self.port))
         sock.listen(1)
 
@@ -63,9 +63,17 @@ class NetworkServerController:
                     if(message.startswith("DROP")):
                         self.dropBomb(s)
 
+                    # The user is leaving the game
+                    if(message.startswith("QUIT")):
+                        i = None
+                        # self.kill_user(user)
+
                 else:
-                    # Handle brutal disconnection
-                    print(user+" has disconnected unexpectedly.")
+                    # Handle disconnection
+                    print(user+" has disconnected.")
+
+                    self.kill_user(user)
+
                     s.close()
                     self.sockets.remove(s)
 
@@ -143,6 +151,10 @@ class NetworkServerController:
             if(d not in ignore and d != self.sockets[0]):
                 d.send(message.encode())
 
+    def kill_user(self,user):
+        if(self.model.quit(self.nicks[user])):
+            del self.nicks[user]
+
 
 
 ################################################################################
@@ -171,6 +183,8 @@ class NetworkClientController:
 
     def keyboard_quit(self):
         print("=> event \"quit\"")
+        self.model.quit(self.nickname)
+        self.send_action("QUIT")
         return False
 
     def keyboard_move_character(self, direction):
