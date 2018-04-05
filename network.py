@@ -65,14 +65,15 @@ class NetworkServerController:
 
                     # The user is leaving the game
                     if(message.startswith("QUIT")):
-                        i = None
-                        # self.kill_user(user)
+                        # Will be handled by socket disconnection, but if we want
+                        # To do something about it we can do it here
+                        i = None # dummy
 
                 else:
                     # Handle disconnection
                     print(user+" has disconnected.")
 
-                    self.kill_user(user)
+                    self.kill_user(user,s)
 
                     s.close()
                     self.sockets.remove(s)
@@ -122,10 +123,12 @@ class NetworkServerController:
             if(p != nick):
                 char = self.model.look(p)
                 if char:
+                    # NEWP nick kind x y
                     s.send(("NEWP "+p+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n").encode())
 
         # Tell about the fruits
         for f in self.model.fruits:
+            # NEWF kind x y
             s.send(("NEWF "+str(f.kind)+" "+str(f.pos[X])+" "+str(f.pos[Y])+"\n").encode())
 
         # Don't tell about the bombs since we will give invincibility for a short time for newcomers
@@ -136,6 +139,7 @@ class NetworkServerController:
     def dropBomb(self,s):
         nick = self.nicks[self.uid_from_socket(s)]
         self.model.drop_bomb(nick)
+        # DROP nick
         self.tell_clients("DROP "+nick+"\n",[s])
 
     def moveCharacter(self,s,message):
@@ -143,16 +147,21 @@ class NetworkServerController:
         direction = message[5:]
         self.model.move_character(nick,int(direction))
 
+        # MOVP nick direction
         self.tell_clients("MOVP "+nick+" "+str(direction)+"\n",[s])
 
     def tell_clients(self,message,ignore=[]):
         print(message)
         for d in self.sockets:
+            # Send encoded message to all peers excepted host and ignored
             if(d not in ignore and d != self.sockets[0]):
                 d.send(message.encode())
 
-    def kill_user(self,user):
+    def kill_user(self,user,s):
+        # Tell the model to remove the user
         if(self.model.quit(self.nicks[user])):
+            # If it works, delete it and tell everyone
+            self.tell_clients("QUIT "+self.nicks[user]+"\n",[s])
             del self.nicks[user]
 
 
@@ -239,6 +248,10 @@ class NetworkClientController:
                     if(line.startswith("WELC ")):
                         self.arrive(line)
 
+                    # The server tells us of a quitting player
+                    if(line.startswith("QUIT ")):
+                        self.quit_player(line)
+
         return True
 
     def arrive(self,message):
@@ -271,6 +284,10 @@ class NetworkClientController:
     def move_character(self,message):
         parts = message.split(" ")
         self.model.move_character(parts[1], int(parts[2]))
+
+    def quit_player(self, message):
+        nick = message.split(" ")[1].split("\n")[0]
+        self.model.quit(nick)
 
     def drop_bomb(self,message):
         nick = message.split(" ")[1].split("\n")[0]
