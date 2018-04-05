@@ -125,9 +125,10 @@ class NetworkServerController:
     def sendMap(self,s):
         s.send((self.model.mappath).encode())
 
-    def drop_bomb(self,s):
+    def dropBomb(self,s):
         nick = self.nicks[self.uid_from_socket(s)]
-        s.send(("DROP "+nick+"\n").encode())
+        self.model.drop_bomb(nick)
+        self.tell_clients("DROP "+nick+"\n",[s])
 
     def moveCharacter(self,s,message):
         nick = self.nicks[self.uid_from_socket(s)]
@@ -180,6 +181,7 @@ class NetworkClientController:
 
     def keyboard_drop_bomb(self):
         print("=> event \"keyboard drop bomb\"")
+        self.drop_bomb("DROP "+self.nickname)
         self.send_action("DROP")
         return True
 
@@ -257,4 +259,5 @@ class NetworkClientController:
         self.model.move_character(parts[1], int(parts[2]))
 
     def drop_bomb(self,message):
-        return True
+        nick = message.split(" ")[1].split("\n")[0]
+        self.model.drop_bomb(nick)
