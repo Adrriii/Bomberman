@@ -89,15 +89,25 @@ class NetworkServerController:
         # Add it to the dictionnary with the UID as the key
         self.nicks[uid] = nick
 
+        # Add to the model and respond positively
         self.model.add_character(nick)
-
         s.send("OK".encode())
 
+        # Tell everyone else of the new player and its features
         char = self.model.look(nick)
-
         self.tell_clients("NEWP "+nick+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n",[s])
 
+        # Tell the new player its features and gives him the map
         s.send(("WELC "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+" "+self.model.mappath+"\n").encode())
+
+        # Send to the new player all the info to catch up with the others
+        self.update_state(s)
+
+        print(uid+" has joined the game with the nickname "+nick)
+
+    def update_state(self,s):
+        uid = self.uid_from_socket(s)
+        nick = self.nicks[uid]
 
         # Tell about other players
         for p in self.nicks.values():
@@ -106,7 +116,11 @@ class NetworkServerController:
                 if char:
                     s.send(("NEWP "+p+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n").encode())
 
-        print(uid+" has a new nickname: "+nick)
+        # Tell about the fruits
+        for f in self.model.fruits:
+            s.send(("NEWF "+str(f.kind)+" "+str(f.pos[X])+" "+str(f.pos[Y])+"\n").encode())
+
+        # Don't tell about the bombs since we will give invincibility for a short time for newcomers
 
     def sendMap(self,s):
         s.send((self.model.mappath).encode())
@@ -193,6 +207,10 @@ class NetworkClientController:
                     if(line.startswith("NEWP ")):
                         self.add_character(line)
 
+                    # New fruit to add
+                    if(line.startswith("NEWF ")):
+                        self.add_fruit(line)
+
                     # Another user is moving
                     if(line.startswith("MOVP")):
                         self.move_character(line)
@@ -214,6 +232,13 @@ class NetworkClientController:
         self.model.load_map(path)
         self.ready = True
         self.model.add_character(self.nickname, True, int(parts[1]),[int(parts[2]),int(parts[3])])
+
+
+    def add_fruit(self,message):
+        # Split the message into arguments
+        parts = message.split(" ")
+
+        self.model.add_fruit(int(parts[1]),(int(parts[2]),int(parts[3])))
 
     def add_character(self,message):
         # Split the message into arguments
