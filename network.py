@@ -33,7 +33,7 @@ class NetworkServerController:
         return str(addr) + ":" + str(port)
 
     def validate_receive(self, s):
-        s.send(b"OK ")
+        self.send_message("OK ", s)
         data = self.receive_message(s)
 
         return data.startswith("OK ")
@@ -118,10 +118,11 @@ class NetworkServerController:
 
         # Tell everyone else of the new player and its features
         char = self.model.look(nick)
-        self.tell_clients("NEWP "+nick+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n",[s])
+        #print("NICK:", nick[0:-1], "couocu")
+        self.tell_clients("NEWP "+nick[0:-1]+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n",[s])
 
         # Tell the new player its features and gives him the map
-        s.send(("WELC "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+" "+self.model.mappath+"\n").encode())
+        self.send_message("WELC "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+" "+self.model.mappath+"\n", s)
 
         # Send to the new player all the info to catch up with the others
         self.update_state(s)
@@ -138,17 +139,17 @@ class NetworkServerController:
                 char = self.model.look(p)
                 if char:
                     # NEWP nick kind x y
-                    s.send(("NEWP "+p+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n").encode())
+                    self.send_message("NEWP "+p[0:-1]+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n", s)
 
         # Tell about the fruits
         for f in self.model.fruits:
             # NEWF kind x y
-            s.send(("NEWF "+str(f.kind)+" "+str(f.pos[X])+" "+str(f.pos[Y])+"\n").encode())
+            self.send_message("NEWF "+str(f.kind)+" "+str(f.pos[X])+" "+str(f.pos[Y])+"\n", s)
 
         # Don't tell about the bombs since we will give invincibility for a short time for newcomers
 
     def sendMap(self,s):
-        s.send((self.model.mappath).encode())
+        self.send_message(self.model.mappath, s)
 
     def dropBomb(self,s):
         nick = self.nicks[self.uid_from_socket(s)]
@@ -162,14 +163,14 @@ class NetworkServerController:
         self.model.move_character(nick,int(direction))
 
         # MOVP nick direction
-        self.tell_clients("MOVP "+nick+" "+str(direction)+"\n",[s])
+        self.tell_clients("MOVP "+nick[0:-1]+" "+str(direction)+"\n",[s])
 
     def tell_clients(self,message,ignore=[]):
         print(message)
         for d in self.sockets:
             # Send encoded message to all peers excepted host and ignored
             if(d not in ignore and d != self.sockets[0]):
-                d.send(message.encode())
+                self.send_message(message, d)
 
     def kill_user(self,user,s):
         # Tell the model to remove the user
@@ -178,10 +179,11 @@ class NetworkServerController:
             self.tell_clients("QUIT "+self.nicks[user]+"\n",[s])
             del self.nicks[user]
 
-    def send_message(self, message):
+    def send_message(self, message, s):
         taille = "%5d "%(len(message) + 1)
         to_send = "BEGIN " + taille + message + "\n"
-        self.server.send(to_send.encode())
+        s.send(to_send.encode())
+        print("SENDING :", to_send)
 
     def receive_message(self, s):
         message = s.recv(6)
@@ -228,10 +230,10 @@ class NetworkClientController:
     # keyboard events and communication with the server
 
     def check_receive(self):
-        data = self.server.recv(10)
-        data_decode = data.decode()
+        data = self.receive_message()
 
-        if data_decode.startswith("OK "):
+
+        if data.startswith("OK "):
             #self.server.send(b"OK ")
             self.send_message("OK ")
             return True
@@ -292,10 +294,10 @@ class NetworkClientController:
         ready = select.select([self.server], [], [], dt/1000)
 
         if ready[0]:
-            data = self.server.recv(1500)
+            message = self.receive_message()
 
-            if data:
-                message = data.decode()
+            if message:
+
                 print(message)
 
                 orders = message.split("\n")
@@ -314,7 +316,7 @@ class NetworkClientController:
                     if(line.startswith("MOVP")):
                         self.move_character(line)
 
-                    # Another user drops a bomb
+                    #message = data.decode()# Another user drops a bomb
                     if(line.startswith("DROP ")):
                         self.drop_bomb(line)
 
@@ -347,17 +349,21 @@ class NetworkClientController:
 
     def add_character(self,message):
         # Split the message into arguments
+        print("IN ADD CHAR")
+        print(message)
         parts = message.split(" ")
+        print(parts)
 
         is_me = False
         if(self.nickname == parts[1]):
             is_me = True
 
-        y = parts[4].split("\n")[0]
+        y = parts[4]
         # Add the character to the model
         self.model.add_character(parts[1], is_me, int(parts[2]),[int(parts[3]),int(y)])
 
     def move_character(self,message):
+        print("IN MOVE CHAR:", message)
         parts = message.split(" ")
         self.model.move_character(parts[1], int(parts[2]))
 
