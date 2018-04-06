@@ -23,6 +23,7 @@ print("pygame version: ", pygame.version.ver)
 if len(sys.argv) != 4:
     print("Usage: {} host port nickname".format(sys.argv[0]))
     sys.exit()
+
 host = sys.argv[1]
 port = int(sys.argv[2])
 nickname = sys.argv[3]
@@ -38,17 +39,14 @@ client = NetworkClientController(model, host, port, nickname)
 
 kb = KeyboardController(client)
 
-# Run first tick for gathering info before display
-#threading.Thread(None, client.tick,None ,(1000,)).start()
 
-#while(not client.ready):
-#    i = None
-
-
+#Attente des premières données permettant d'afficher la grille
 while not client.tick(3000):
+    print("Tentative de connexion")
     continue
 
 view = GraphicView(model, nickname)
+
 # main loop
 while True:
     # make sure game doesn't run at more than FPS frames per second

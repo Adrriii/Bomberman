@@ -32,6 +32,13 @@ class NetworkServerController:
         port = s.getpeername()[1]
         return str(addr) + ":" + str(port)
 
+    def validate_receive(self, s):
+        s.send(b"OK ")
+        data = s.recv(10)
+        data_decode = data.decode()
+        return data_decode.startswith("OK ")
+
+
     def tick(self, dt):
         (read,e1,e2) = select.select(self.sockets,[],[])
 
@@ -49,6 +56,7 @@ class NetworkServerController:
 
                     # The user is joining
                     if(message.startswith("JOIN ")):
+                        self.validate_receive(s)
                         self.changeNickname(s,message)
 
                     # The user is requesting the server map
@@ -102,9 +110,7 @@ class NetworkServerController:
 
         # Add to the model and respond positively
         self.model.add_character(nick)
-        s.send("OK ".encode())
-        s.recv(1500)
-        #WAIT
+
 
         # Tell everyone else of the new player and its features
         char = self.model.look(nick)
@@ -187,16 +193,23 @@ class NetworkClientController:
         s.connect((self.host,self.port))
 
         self.server = s
-        self.server.send(("JOIN "+self.nickname).encode())
-        data = self.server.recv(1500)
-        message = data.decode()
-        if message.startswith("OK "):
-            self.server.send(b"OK ")
+        connected = False
 
+        while not connected:
 
-
+            self.server.send(("JOIN "+self.nickname).encode())
+            connected = self.check_receive()
 
     # keyboard events and communication with the server
+
+    def check_receive(self):
+        data = self.server.recv(10)
+        data_decode = data.decode()
+
+        if data_decode.startswith("OK "):
+            self.server.send(b"OK ")
+            return True
+        return False
 
     def keyboard_quit(self):
         print("=> event \"quit\"")
