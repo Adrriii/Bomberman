@@ -34,9 +34,9 @@ class NetworkServerController:
 
     def validate_receive(self, s):
         s.send(b"OK ")
-        data = s.recv(10)
-        data_decode = data.decode()
-        return data_decode.startswith("OK ")
+        data = self.receive_message(s)
+
+        return data.startswith("OK ")
 
 
     def tick(self, dt):
@@ -46,12 +46,16 @@ class NetworkServerController:
             if(s == self.sockets[0]):
                 sockets = self.welcomeUser(s,self.sockets)
             else:
-                data = s.recv(1500) # Get the data with a buffer of 1500
+                message = self.receive_message(s)
+                print("REC :", message)
+
+                #data = s.recv(1500) # Get the data with a buffer of 1500
                 user = self.uid_from_socket(s)
 
-                if data:
+                if message != None:
                     # Handle user command
-                    message = data.decode()
+                    #message = data.decode()
+
                     print(user+": "+message)
 
                     # The user is joining
@@ -174,6 +178,27 @@ class NetworkServerController:
             self.tell_clients("QUIT "+self.nicks[user]+"\n",[s])
             del self.nicks[user]
 
+    def send_message(self, message):
+        taille = "%5d "%(len(message) + 1)
+        to_send = "BEGIN " + taille + message + "\n"
+        self.server.send(to_send.encode())
+
+    def receive_message(self, s):
+        message = s.recv(6)
+
+        if message.decode() == "BEGIN ":
+            taille = s.recv(6)
+
+            try:
+                len = int(taille.decode())
+            except ValueError:
+                print("Erreur reception, impossible de convertir la taille du message :")
+                print(message.decode())
+                return ""
+
+            command = s.recv(len)
+            return command.decode()
+
 
 
 ################################################################################
@@ -196,8 +221,8 @@ class NetworkClientController:
         connected = False
 
         while not connected:
-
-            self.server.send(("JOIN "+self.nickname).encode())
+            self.send_message("JOIN " + self.nickname)
+            #self.server.send(("JOIN "+self.nickname).encode())
             connected = self.check_receive()
 
     # keyboard events and communication with the server
@@ -207,30 +232,58 @@ class NetworkClientController:
         data_decode = data.decode()
 
         if data_decode.startswith("OK "):
-            self.server.send(b"OK ")
+            #self.server.send(b"OK ")
+            self.send_message("OK ")
             return True
         return False
 
     def keyboard_quit(self):
         print("=> event \"quit\"")
         self.model.quit(self.nickname)
-        self.send_action("QUIT")
+        #self.send_action("QUIT")
+        self.send_message("QUIT")
         return False
 
     def keyboard_move_character(self, direction):
         print("=> event \"keyboard move direction\" {}".format(DIRECTIONS_STR[direction]))
         self.model.move_character(self.nickname,direction)
-        self.send_action("MOVE "+str(direction))
+        #self.send_action("MOVE "+str(direction))
+        self.send_message("MOVE "+str(direction))
         return True
 
     def keyboard_drop_bomb(self):
         print("=> event \"keyboard drop bomb\"")
         self.drop_bomb("DROP "+self.nickname)
-        self.send_action("DROP")
+        #self.send_action("DROP")
+        self.send_message("DROP")
         return True
 
     def send_action(self,action):
         self.server.send(action.encode())
+
+
+    def send_message(self, message):
+        taille = "%5d "%(len(message) + 1)
+        to_send = "BEGIN " + taille + message + "\n"
+        print("SENDING :", to_send)
+        self.server.send(to_send.encode())
+
+    def receive_message(self):
+        message = self.server.recv(6)
+
+        if message.decode() == "BEGIN ":
+            taille = self.server.recv(6)
+
+            try:
+                len = int(taille.decode())
+            except ValueError:
+                print("Erreur reception, impossible de convertir la taille du message :")
+                print(message.decode())
+                return ""
+
+            command = self.server.recv(len)
+            return command.decode()
+
 
     # time event
 
