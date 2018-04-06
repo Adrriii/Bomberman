@@ -1,5 +1,5 @@
 # Bomber Man #
-
+ 
 This is a simple "Bomber Man" game written in Python 3, based on the *PyGame* library.
 
 ![Bomber Man Snapshot](snap0.png?raw=true "snapshot")
