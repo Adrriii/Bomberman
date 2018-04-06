@@ -95,12 +95,16 @@ class NetworkServerController:
 
         # Only take the decoded string data without JOIN
         nick = message[5:]
+        print("Join recv:")
+
         # Add it to the dictionnary with the UID as the key
         self.nicks[uid] = nick
 
         # Add to the model and respond positively
         self.model.add_character(nick)
-        s.send("OK".encode())
+        s.send("OK ".encode())
+        s.recv(1500)
+        #WAIT
 
         # Tell everyone else of the new player and its features
         char = self.model.look(nick)
@@ -185,6 +189,10 @@ class NetworkClientController:
         self.server = s
         self.server.send(("JOIN "+self.nickname).encode())
         data = self.server.recv(1500)
+        message = data.decode()
+        if message.startswith("OK "):
+            self.server.send(b"OK ")
+
 
 
 
@@ -251,6 +259,8 @@ class NetworkClientController:
                     # The server tells us of a quitting player
                     if(line.startswith("QUIT ")):
                         self.quit_player(line)
+        else:
+            return False
 
         return True
 

@@ -39,10 +39,14 @@ client = NetworkClientController(model, host, port, nickname)
 kb = KeyboardController(client)
 
 # Run first tick for gathering info before display
-threading.Thread(None, client.tick,None ,(1000,)).start()
+#threading.Thread(None, client.tick,None ,(1000,)).start()
 
-while(not client.ready):
-    i = None
+#while(not client.ready):
+#    i = None
+
+
+while not client.tick(3000):
+    continue
 
 view = GraphicView(model, nickname)
 # main loop
