@@ -234,7 +234,7 @@ class NetworkClientController:
 
     # time event
 
-    def tick(self, dt):
+    def tick(self, dt=0):
         # Check if some data has been sent by the server
         ready = select.select([self.server], [], [], dt/1000)
 
