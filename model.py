@@ -282,3 +282,4 @@ class Model:
                     self.characters.remove(character)
                     if character == self.player:
                         self.player = None
+                        exit()

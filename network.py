@@ -27,12 +27,6 @@ class NetworkServerController:
 
         self.sockets = [sock]
 
-    def uid_from_socket(self,s):
-        addr = s.getpeername()[0]
-        port = s.getpeername()[1]
-        return str(addr) + ":" + str(port)
-
-
     def tick(self, dt):
         (read,e1,e2) = select.select(self.sockets,[],[])
 
@@ -72,7 +66,8 @@ class NetworkServerController:
                     if(message.startswith("QUIT")):
                         # Will be handled by socket disconnection, but if we want
                         # To do something about it we can do it here
-                        i = None # dummy
+                        s.close()
+                        self.socket.remove(s)
 
                 else:
                     # Handle disconnection
@@ -84,6 +79,40 @@ class NetworkServerController:
                     self.sockets.remove(s)
 
         return True
+
+    def tell_clients(self,message,ignore=[]):
+        print(message)
+        for d in self.sockets:
+            # Send encoded message to all peers excepted host and ignored
+            if(d not in ignore and d != self.sockets[0]):
+                self.send_message(message, d)
+
+    def send_message(self, message, s):
+        taille = "%5d "%(len(message) + 1)
+        to_send = "BEGIN " + taille + message + "\n"
+        s.send(to_send.encode())
+        print("SENDING :", to_send)
+
+    def receive_message(self, s):
+        message = s.recv(6)
+
+        if message.decode() == "BEGIN ":
+            taille = s.recv(6)
+
+            try:
+                len = int(taille.decode())
+            except ValueError:
+                print("Erreur reception, impossible de convertir la taille du message :")
+                print(message.decode())
+                return ""
+
+            command = s.recv(len)
+            return command.decode()
+
+    def uid_from_socket(self,s):
+        addr = s.getpeername()[0]
+        port = s.getpeername()[1]
+        return str(addr) + ":" + str(port)
 
     # Handles a new connection
     def welcomeUser(self,s,sockets):
@@ -158,13 +187,6 @@ class NetworkServerController:
         # MOVP nick direction
         self.tell_clients("MOVP "+nick[0:-1]+" "+str(direction)+"\n",[s])
 
-    def tell_clients(self,message,ignore=[]):
-        print(message)
-        for d in self.sockets:
-            # Send encoded message to all peers excepted host and ignored
-            if(d not in ignore and d != self.sockets[0]):
-                self.send_message(message, d)
-
     def kill_user(self,user,s):
         # Tell the model to remove the user
         if(self.model.quit(self.nicks[user])):
@@ -172,27 +194,7 @@ class NetworkServerController:
             self.tell_clients("QUIT "+self.nicks[user]+"\n",[s])
             del self.nicks[user]
 
-    def send_message(self, message, s):
-        taille = "%5d "%(len(message) + 1)
-        to_send = "BEGIN " + taille + message + "\n"
-        s.send(to_send.encode())
-        print("SENDING :", to_send)
 
-    def receive_message(self, s):
-        message = s.recv(6)
-
-        if message.decode() == "BEGIN ":
-            taille = s.recv(6)
-
-            try:
-                len = int(taille.decode())
-            except ValueError:
-                print("Erreur reception, impossible de convertir la taille du message :")
-                print(message.decode())
-                return ""
-
-            command = s.recv(len)
-            return command.decode()
 
 
 
@@ -217,33 +219,27 @@ class NetworkClientController:
 
         self.send_message("JOIN " + self.nickname)
 
-    # keyboard events and communication with the server
-
+    #####################################################
+    # keyboard events and communication with the server #
+    #####################################################
 
     def keyboard_quit(self):
         print("=> event \"quit\"")
         self.model.quit(self.nickname)
-        #self.send_action("QUIT")
         self.send_message("QUIT")
         return False
 
     def keyboard_move_character(self, direction):
         print("=> event \"keyboard move direction\" {}".format(DIRECTIONS_STR[direction]))
         self.model.move_character(self.nickname,direction)
-        #self.send_action("MOVE "+str(direction))
         self.send_message("MOVE "+str(direction))
         return True
 
     def keyboard_drop_bomb(self):
         print("=> event \"keyboard drop bomb\"")
         self.drop_bomb("DROP "+self.nickname)
-        #self.send_action("DROP")
         self.send_message("DROP")
         return True
-
-    def send_action(self,action):
-        self.server.send(action.encode())
-
 
     def send_message(self, message):
         taille = "%5d "%(len(message) + 1)
@@ -267,8 +263,9 @@ class NetworkClientController:
             command = self.server.recv(len)
             return command.decode()
 
-
-    # time event
+    ##############
+    # time event #
+    ##############
 
     def tick(self, dt=0):
         # Check if some data has been sent by the server
@@ -278,13 +275,12 @@ class NetworkClientController:
             message = self.receive_message()
 
             if message:
-
                 print(message)
 
                 orders = message.split("\n")
 
                 for line in orders:
-                    print("read: "+line)
+
                     # New user is joining
                     if(line.startswith("NEWP ")):
                         self.add_character(line)
@@ -321,11 +317,9 @@ class NetworkClientController:
         self.ready = True
         self.model.add_character(self.nickname, True, int(parts[1]),[int(parts[2]),int(parts[3])])
 
-
     def add_fruit(self,message):
         # Split the message into arguments
         parts = message.split(" ")
-
         self.model.add_fruit(int(parts[1]),(int(parts[2]),int(parts[3])))
 
     def add_character(self,message):
