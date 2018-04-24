@@ -206,7 +206,6 @@ class Model:
             print("Error: nickname {} not found!".format(nickname))
             sys.exit(1)
         self.characters.remove(character)
-        if self.player == character: self.player = None
         print("=> kill \"{}\"".format(nickname))
         return character
 
@@ -281,4 +280,5 @@ class Model:
             for character in self.characters:
                 if character.explosion(bomb):
                     self.characters.remove(character)
-                    self.player = None
+                    if character == self.player:
+                        self.player = None

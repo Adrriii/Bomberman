@@ -32,12 +32,6 @@ class NetworkServerController:
         port = s.getpeername()[1]
         return str(addr) + ":" + str(port)
 
-    def validate_receive(self, s):
-        self.send_message("OK ", s)
-        data = self.receive_message(s)
-
-        return data.startswith("OK ")
-
 
     def tick(self, dt):
         (read,e1,e2) = select.select(self.sockets,[],[])
@@ -60,7 +54,6 @@ class NetworkServerController:
 
                     # The user is joining
                     if(message.startswith("JOIN ")):
-                        self.validate_receive(s)
                         self.changeNickname(s,message)
 
                     # The user is requesting the server map
@@ -222,22 +215,10 @@ class NetworkClientController:
         self.server = s
         connected = False
 
-        while not connected:
-            self.send_message("JOIN " + self.nickname)
-            #self.server.send(("JOIN "+self.nickname).encode())
-            connected = self.check_receive()
+        self.send_message("JOIN " + self.nickname)
 
     # keyboard events and communication with the server
 
-    def check_receive(self):
-        data = self.receive_message()
-
-
-        if data.startswith("OK "):
-            #self.server.send(b"OK ")
-            self.send_message("OK ")
-            return True
-        return False
 
     def keyboard_quit(self):
         print("=> event \"quit\"")

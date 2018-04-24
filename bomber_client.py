@@ -54,8 +54,6 @@ while True:
     if not kb.tick(dt): break
     model.tick(dt)
     view.tick(dt)
-    #ça marche sans
-    #threading.Thread(None, client.tick,None ,(dt,)).start()
     client.tick()
 
 # quit
