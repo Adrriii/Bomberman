@@ -41,8 +41,8 @@ kb = KeyboardController(client)
 
 
 #Attente des premières données permettant d'afficher la grille
-while not client.tick(3000):
-    print("Tentative de connexion")
+while not client.ready:
+    client.tick()
     continue
 
 view = GraphicView(model, nickname)
@@ -53,8 +53,9 @@ while True:
     dt = clock.tick(FPS)
     if not kb.tick(dt): break
     model.tick(dt)
-    view.tick(dt)
+
     client.tick()
+    view.tick(dt)
 
 # quit
 print("Game Over!")

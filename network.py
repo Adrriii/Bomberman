@@ -4,6 +4,7 @@
 from model import *
 import socket
 import select
+import random
 
 ################################################################################
 #                          NETWORK SERVER CONTROLLER                           #
@@ -66,17 +67,19 @@ class NetworkServerController:
                     if(message.startswith("QUIT")):
                         # Will be handled by socket disconnection, but if we want
                         # To do something about it we can do it here
-                        s.close()
-                        self.socket.remove(s)
+                        self.kill_user(user, s)
+                        continue
 
                 else:
                     # Handle disconnection
                     print(user+" has disconnected.")
 
                     self.kill_user(user,s)
+                    continue
 
-                    s.close()
-                    self.sockets.remove(s)
+
+        if random.randint(0, 1000)%2 == 0:
+            self.alea_bomb()
 
         return True
 
@@ -108,6 +111,7 @@ class NetworkServerController:
 
             command = s.recv(len)
             return command.decode()
+
 
     def uid_from_socket(self,s):
         addr = s.getpeername()[0]
@@ -193,6 +197,14 @@ class NetworkServerController:
             # If it works, delete it and tell everyone
             self.tell_clients("QUIT "+self.nicks[user]+"\n",[s])
             del self.nicks[user]
+            s.close()
+            self.sockets.remove(s)
+
+    def alea_bomb(self):
+        print("Sever send BOMB !")
+        random_pos = self.model.map.random()
+        self.model.bombs.append(Bomb(self.model.map, random_pos))
+        self.tell_clients("SERVDROP " + str(random_pos[0]) + " " + str(random_pos[1]))
 
 
 
@@ -215,8 +227,6 @@ class NetworkClientController:
         s.connect((self.host,self.port))
 
         self.server = s
-        connected = False
-
         self.send_message("JOIN " + self.nickname)
 
     #####################################################
@@ -304,6 +314,10 @@ class NetworkClientController:
                     # The server tells us of a quitting player
                     if(line.startswith("QUIT ")):
                         self.quit_player(line)
+
+                    if line.startswith("SERVDROP"):
+                        if self.ready:
+                            self.server_bomb(line)
         else:
             return False
 
@@ -349,3 +363,9 @@ class NetworkClientController:
     def drop_bomb(self,message):
         nick = message.split(" ")[1].split("\n")[0]
         self.model.drop_bomb(nick)
+
+    def server_bomb(self, message):
+        pos = message.split(" ")
+        x = int(pos[1])
+        y = int(pos[2])
+        self.model.bombs.append(Bomb(self.model.map, (x, y)))
