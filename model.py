@@ -210,7 +210,7 @@ class Model:
             sys.exit(1)
         self.characters.remove(character)
         print("=> kill \"{}\"".format(nickname))
-        return character
+        return True
 
     # quit game
     def quit(self, nickname = None):

@@ -141,7 +141,7 @@ class NetworkServerController:
         # Only take the decoded string data without JOIN
         # The nickname should always be at the end
         splitted = message.split(" ")
-        nick = splitted[(len(splitted)-1)][:-1]
+        nick = splitted[(len(splitted)-1)].split("\n")[0]
         print("Join recv:")
 
         # Add it to the dictionnary with the UID as the key
@@ -209,14 +209,15 @@ class NetworkServerController:
         if tile == "3":
             print(nick+' stepped on a teleporter!')
             self.teleport_user(s)
-
-        # MOVP nick direction
-        self.tell_clients("MOVP "+nick[0:-1]+" "+str(direction)+"\n",[s])
+        else:
+            # MOVP nick direction
+            self.tell_clients("MOVP "+nick[0:-1]+" "+str(direction)+"\n",[s])
 
     def teleport_user(self,s):
         # We can change the server depending in the teleporter tile
         # This would require a teleporter object in the model
         self.send_message("TPSP localhost 7778",s)
+        self.kill_user(self.uid_from_socket(s),s)
 
     def kill_user(self,user,s):
         # Tell the model to remove the user
