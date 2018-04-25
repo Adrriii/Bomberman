@@ -160,7 +160,7 @@ class NetworkServerController:
         # Tell everyone else of the new player and its features
         char.immunity = 5000;
         #print("NICK:", nick[0:-1], "coucou")
-        self.tell_clients("NEWP "+nick[0:-1]+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n",[s])
+        self.tell_clients("NEWP "+nick+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n",[s])
 
         # Tell the new player its features and gives him the map
         self.send_message("WELC "+str(char.kind)+" "+str(char.health)+" "+str(char.pos[X])+" "+str(char.pos[Y])+" "+self.model.mappath+"\n", s)
@@ -180,7 +180,7 @@ class NetworkServerController:
                 char = self.model.look(p)
                 if char:
                     # NEWP nick kind x y
-                    self.send_message("NEWP "+p[0:-1]+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n", s)
+                    self.send_message("NEWP "+p+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n", s)
 
         # Tell about the fruits
         for f in self.model.fruits:
@@ -211,7 +211,7 @@ class NetworkServerController:
             self.teleport_user(s)
         else:
             # MOVP nick direction
-            self.tell_clients("MOVP "+nick[0:-1]+" "+str(direction)+"\n",[s])
+            self.tell_clients("MOVP "+nick+" "+str(direction)+"\n",[s])
 
     def teleport_user(self,s):
         # We can change the server depending in the teleporter tile
@@ -232,10 +232,10 @@ class NetworkServerController:
             self.sockets.remove(s)
 
     def alea_bomb(self):
-        print("Sever send BOMB !")
+        #print("Sever send BOMB !")
         random_pos = self.model.map.random()
         self.model.bombs.append(Bomb(self.model.map, random_pos))
-        self.tell_clients("SERVDROP " + str(random_pos[0]) + " " + str(random_pos[1]))
+        #self.tell_clients("SERVDROP " + str(random_pos[0]) + " " + str(random_pos[1]))
 
 
 
