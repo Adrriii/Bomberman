@@ -261,9 +261,6 @@ class Model:
             print("Error: nickname \"{}\" not found!".format(nickname))
             sys.exit(1)
         character.move(direction)
-        tile = self.map.get_tile(character.pos[X], character.pos[Y])
-        if tile == "3":
-            print(nickname+' stepped on a teleporter!')
         print("=> move {} \"{}\" at position ({},{})".format(DIRECTIONS_STR[direction], nickname, character.pos[X], character.pos[Y]))
 
     # update model at each clock tick

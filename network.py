@@ -196,6 +196,12 @@ class NetworkServerController:
         direction = message[5:]
         self.model.move_character(nick,int(direction))
 
+        character = self.model.look(nick)
+
+        tile = self.model.map.get_tile(character.pos[X], character.pos[Y])
+        if tile == "3":
+            print(nick+' stepped on a teleporter!')
+
         # MOVP nick direction
         self.tell_clients("MOVP "+nick[0:-1]+" "+str(direction)+"\n",[s])
 
