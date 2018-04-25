@@ -23,7 +23,10 @@ class NetworkServerController:
 
         # Socket creation
         sock = socket.socket(socket.AF_INET6,socket.SOCK_STREAM,0)
-        sock.setsockopt(1,socket.SO_REUSEADDR,1024) # for testing
+        try:
+            sock.setsockopt(1,socket.SO_REUSEADDR,1024) # for testing
+        except:
+            print('Could not enable SO_REUSEADDR')
         sock.bind(('',self.port))
         sock.listen(1)
 
@@ -79,7 +82,7 @@ class NetworkServerController:
                     continue
 
 
-        if random.randint(0, 1000)%10 == 0:
+        if random.randint(0, 1000)%100 == 0:
             self.alea_bomb()
 
         return True
@@ -136,7 +139,7 @@ class NetworkServerController:
         uid = self.uid_from_socket(s)
 
         # Only take the decoded string data without JOIN
-        nick = message[5:]
+        nick = message[5:-1]
         print("Join recv:")
 
         # Add it to the dictionnary with the UID as the key
