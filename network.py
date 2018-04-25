@@ -19,6 +19,7 @@ class NetworkServerController:
         # Nicks -> key:"remote_addr+remote_port" -> nickname string
         # Dictionnary with all users' nicknames
         self.nicks = {}
+        self.save_sock = {}
 
         # Socket creation
         sock = socket.socket(socket.AF_INET6,socket.SOCK_STREAM,0)
@@ -38,13 +39,11 @@ class NetworkServerController:
                 message = self.receive_message(s)
                 print("REC :", message)
 
-                #data = s.recv(1500) # Get the data with a buffer of 1500
-                user = self.uid_from_socket(s)
+
 
                 if message != None:
+                    user = self.uid_from_socket(s)
                     # Handle user command
-                    #message = data.decode()
-
                     print(user+": "+message)
 
                     # The user is joining
@@ -72,6 +71,8 @@ class NetworkServerController:
 
                 else:
                     # Handle disconnection
+                    print (self.save_sock)
+                    user = self.save_sock[s]
                     print(user+" has disconnected.")
 
                     self.kill_user(user,s)
@@ -97,7 +98,11 @@ class NetworkServerController:
         print("SENDING :", to_send)
 
     def receive_message(self, s):
-        message = s.recv(6)
+        try:
+            message = s.recv(6)
+        except:
+            print("Caught socket error.")
+            return None
 
         if message.decode() == "BEGIN ":
             taille = s.recv(6)
@@ -111,7 +116,6 @@ class NetworkServerController:
 
             command = s.recv(len)
             return command.decode()
-
 
     def uid_from_socket(self,s):
         addr = s.getpeername()[0]
@@ -137,6 +141,7 @@ class NetworkServerController:
 
         # Add it to the dictionnary with the UID as the key
         self.nicks[uid] = nick
+        self.save_sock[s] = uid
 
         # Add to the model and respond positively
         self.model.add_character(nick)
@@ -197,6 +202,7 @@ class NetworkServerController:
             # If it works, delete it and tell everyone
             self.tell_clients("QUIT "+self.nicks[user]+"\n",[s])
             del self.nicks[user]
+            del self.save_sock[s]
             s.close()
             self.sockets.remove(s)
 
