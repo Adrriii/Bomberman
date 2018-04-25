@@ -136,5 +136,9 @@ class GraphicView:
             self.render_fruit(fruit)
         for character in self.model.characters:
             self.render_character(character)
+        if(self.width != self.model.map.width*SPRITE_SIZE or self.height != self.model.map.height*SPRITE_SIZE):
+            self.width = self.model.map.width*SPRITE_SIZE
+            self.height = self.model.map.height*SPRITE_SIZE
+            self.win = pygame.display.set_mode((self.width, self.height))
         self.render_player(self.model.player)
         pygame.display.flip()

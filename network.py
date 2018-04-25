@@ -50,7 +50,7 @@ class NetworkServerController:
                     print(user+": "+message)
 
                     # The user is joining
-                    if(message.startswith("JOIN ")):
+                    if(message.startswith("JOIN ") or message.startswith("JOSP ")):
                         self.changeNickname(s,message)
 
                     # The user is requesting the server map
@@ -139,7 +139,9 @@ class NetworkServerController:
         uid = self.uid_from_socket(s)
 
         # Only take the decoded string data without JOIN
-        nick = message[5:-1]
+        # The nickname should always be at the end
+        splitted = message.split(" ")
+        nick = splitted[(len(splitted)-1)][:-1]
         print("Join recv:")
 
         # Add it to the dictionnary with the UID as the key
@@ -148,15 +150,20 @@ class NetworkServerController:
 
         # Add to the model and respond positively
         self.model.add_character(nick)
+        char = self.model.look(nick)
 
+        # If the player comes in a special way
+        if  message.startswith("JOSP "):
+            char.health = int(splitted[1])
+            char.kind = int(splitted[2])
 
         # Tell everyone else of the new player and its features
-        char = self.model.look(nick)
-        #print("NICK:", nick[0:-1], "couocu")
+        char.immunity = 5000;
+        #print("NICK:", nick[0:-1], "coucou")
         self.tell_clients("NEWP "+nick[0:-1]+" "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+"\n",[s])
 
         # Tell the new player its features and gives him the map
-        self.send_message("WELC "+str(char.kind)+" "+str(char.pos[X])+" "+str(char.pos[Y])+" "+self.model.mappath+"\n", s)
+        self.send_message("WELC "+str(char.kind)+" "+str(char.health)+" "+str(char.pos[X])+" "+str(char.pos[Y])+" "+self.model.mappath+"\n", s)
 
         # Send to the new player all the info to catch up with the others
         self.update_state(s)
@@ -201,9 +208,15 @@ class NetworkServerController:
         tile = self.model.map.get_tile(character.pos[X], character.pos[Y])
         if tile == "3":
             print(nick+' stepped on a teleporter!')
+            self.teleport_user(s)
 
         # MOVP nick direction
         self.tell_clients("MOVP "+nick[0:-1]+" "+str(direction)+"\n",[s])
+
+    def teleport_user(self,s):
+        # We can change the server depending in the teleporter tile
+        # This would require a teleporter object in the model
+        self.send_message("TPSP localhost 7778",s)
 
     def kill_user(self,user,s):
         # Tell the model to remove the user
@@ -330,9 +343,14 @@ class NetworkClientController:
                     if(line.startswith("QUIT ")):
                         self.quit_player(line)
 
+                    # The server drops a bomb
                     if line.startswith("SERVDROP"):
                         if self.ready:
                             self.server_bomb(line)
+
+                    # The server tells us where the teleporter leads to
+                    if line.startswith("TPSP"):
+                        self.switch_server(line)
         else:
             return False
 
@@ -341,10 +359,12 @@ class NetworkClientController:
     def arrive(self,message):
         print("Arriving")
         parts = message.split(" ")
-        path = parts[4]
+        path = parts[5]
         self.model.load_map(path)
         self.ready = True
-        self.model.add_character(self.nickname, True, int(parts[1]),[int(parts[2]),int(parts[3])])
+        self.model.add_character(self.nickname, True, int(parts[1]),[int(parts[3]),int(parts[4])])
+        char = self.model.look(self.nickname)
+        char.health = int(parts[2])
 
     def add_fruit(self,message):
         # Split the message into arguments
@@ -365,6 +385,7 @@ class NetworkClientController:
         y = parts[4]
         # Add the character to the model
         self.model.add_character(parts[1], is_me, int(parts[2]),[int(parts[3]),int(y)])
+        self.model.look(parts[1]).immunity = 5000
 
     def move_character(self,message):
         print("IN MOVE CHAR:", message)
@@ -384,3 +405,23 @@ class NetworkClientController:
         x = int(pos[1])
         y = int(pos[2])
         self.model.bombs.append(Bomb(self.model.map, (x, y)))
+
+    def switch_server(self,message):
+        address = message.split(" ")[1].split("\n")[0]
+        port = message.split(" ")[2].split("\n")[0]
+        self.host = address
+        self.port = int(port)
+        self.join_special()
+
+    def join_special(self):
+        me = self.model.look(self.nickname)
+        message = "JOSP "+str(me.health)+" "+str(me.kind)+ " " +self.nickname
+
+        self.model.empty_model()
+        self.server.close()
+
+        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        s.connect((self.host,self.port))
+
+        self.server = s
+        self.send_message(message)

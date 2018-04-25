@@ -263,6 +263,11 @@ class Model:
         character.move(direction)
         print("=> move {} \"{}\" at position ({},{})".format(DIRECTIONS_STR[direction], nickname, character.pos[X], character.pos[Y]))
 
+    def empty_model(self):
+        self.characters = []
+        self.fruits = []
+        self.bombs = []
+
     # update model at each clock tick
     def tick(self, dt):
         # update bombs (and remove it)
