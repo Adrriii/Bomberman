@@ -19,7 +19,7 @@ RED = (255, 0, 0)
 
 ### Sprites ###
 
-SPRITE_BACKGROUNDS = [ "images/misc/bg0.png", "images/misc/bg1.png", "images/misc/bg2.png" ]
+SPRITE_BACKGROUNDS = [ "images/misc/bg0.png", "images/misc/bg1.png", "images/misc/bg2.png", "images/misc/tp.png" ]
 SPRITE_BLANK = "images/misc/blank.png"
 SPRITE_WALLS = [ "images/misc/wall0.png", "images/misc/wall1.png", "images/misc/wall2.png" ]
 SPRITE_BOMB = "images/misc/bomb.png"
@@ -80,6 +80,8 @@ class GraphicView:
                     self.win.blit(self.sprite_backgrounds[1], (x0, y0))
                 elif square == '2':
                     self.win.blit(self.sprite_backgrounds[2], (x0, y0))
+                elif square == '3':
+                    self.win.blit(self.sprite_backgrounds[3], (x0, y0))
                 else:
                     self.win.blit(self.sprite_blank, (x0, y0)) # blank
 

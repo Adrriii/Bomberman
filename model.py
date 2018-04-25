@@ -64,6 +64,9 @@ class Map:
             self.height = len(self.array)
             self.width = len(self.array[0])
 
+    def get_tile(self, x, y):
+        return self.array[y][x]
+
     def random(self):
         while True:
             x = random.randint(0, self.width-1)
@@ -258,6 +261,9 @@ class Model:
             print("Error: nickname \"{}\" not found!".format(nickname))
             sys.exit(1)
         character.move(direction)
+        tile = self.map.get_tile(character.pos[X], character.pos[Y])
+        if tile == "3":
+            print(nickname+' stepped on a teleporter!')
         print("=> move {} \"{}\" at position ({},{})".format(DIRECTIONS_STR[direction], nickname, character.pos[X], character.pos[Y]))
 
     # update model at each clock tick
