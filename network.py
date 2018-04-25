@@ -30,7 +30,7 @@ class NetworkServerController:
         self.sockets = [sock]
 
     def tick(self, dt):
-        (read,e1,e2) = select.select(self.sockets,[],[])
+        (read,e1,e2) = select.select(self.sockets,[],[], dt/1000)
 
         for s in read:
             if(s == self.sockets[0]):
@@ -79,7 +79,7 @@ class NetworkServerController:
                     continue
 
 
-        if random.randint(0, 1000)%2 == 0:
+        if random.randint(0, 1000)%10 == 0:
             self.alea_bomb()
 
         return True
