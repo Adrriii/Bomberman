@@ -21,6 +21,7 @@ RED = (255, 0, 0)
 
 SPRITE_BACKGROUNDS = [ "images/misc/bg0.png", "images/misc/bg1.png", "images/misc/bg2.png", "images/misc/tp.png" ]
 SPRITE_BLANK = "images/misc/blank.png"
+SPRITE_HEART = "images/misc/heart.png"
 SPRITE_WALLS = [ "images/misc/wall0.png", "images/misc/wall1.png", "images/misc/wall2.png" ]
 SPRITE_BOMB = "images/misc/bomb.png"
 SPRITE_FIRE = "images/misc/fire.png"
@@ -44,6 +45,7 @@ class GraphicView:
         self.sprite_walls = [ pygame.image.load(sprite).convert() for sprite in SPRITE_WALLS ]
         self.sprite_backgrounds = [ pygame.image.load(sprite).convert() for sprite in SPRITE_BACKGROUNDS ]
         self.sprite_blank = pygame.image.load(SPRITE_BLANK).convert()
+        self.sprite_heart = pygame.image.load(SPRITE_HEART).convert_alpha()
         self.sprite_fruits = [ pygame.image.load(sprite).convert_alpha() for sprite in SPRITE_FRUITS ]
         self.sprite_bomb = pygame.image.load(SPRITE_BOMB).convert_alpha()
         self.sprite_fire = pygame.image.load(SPRITE_FIRE).convert_alpha()
@@ -52,6 +54,7 @@ class GraphicView:
         sprite_batman = [ pygame.image.load(sprite).convert_alpha() for sprite in SPRITE_BATMAN ]
         self.sprite_characters = [sprite_dk, sprite_link, sprite_batman]
         # init view
+        pygame.font.init()
         pygame.display.set_icon(self.sprite_bomb)
         title = WIN_TITLE
         if playername: title = WIN_TITLE + " (" + playername + ")"
@@ -127,6 +130,13 @@ class GraphicView:
         y = player.pos[Y] * SPRITE_SIZE
         pygame.draw.rect(self.win, RED, (x, y, SPRITE_SIZE, SPRITE_SIZE), 1)
 
+    def render_life(self, player):
+        x = 3
+        y = 3
+        health_text = self.font.render(str(player.health), False, (0, 0, 0))
+        self.win.blit(self.sprite_heart, (x, y))
+        self.win.blit(health_text, (x+35, y+5))
+
     # render PyGame graphic view at each clock tick
     def tick(self, dt):
         self.render_map(self.model.map)
@@ -141,4 +151,5 @@ class GraphicView:
             self.height = self.model.map.height*SPRITE_SIZE
             self.win = pygame.display.set_mode((self.width, self.height))
         self.render_player(self.model.player)
+        self.render_life(self.model.player)
         pygame.display.flip()
