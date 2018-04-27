@@ -44,8 +44,16 @@ Attention cependant, pour que le téléporteur fonctionne, il est nécessaire d'
 \newpage
 
 \section{Architecture et Implémentation}
-\subsection{Étude du modèle existant}
+Nous avons implémenté nos modifications en tentant au maximum de respecter la structure existante. L'architecture est donc restée identique à celle proposée.
 
+\subsection{Étude du modèle existant}
+Le jeu tel que nous l'avons récupéré utilise le modèle Modèle Vue Controleur. Le controleur avait été modifié pour réaliser une intéraction entre clients et serveurs, tandis que le modèle est resté identique. La vue n'a également pas été modifiée, mais elle n'est pas invoquée complètement par le serveur.
+\\
+
+Pour son interface graphique, ce jeu utilise pygame qui est une librairie libre et open source destinée à créer des jeux en python, reposant sur la librairie SDL.
+\\
+
+Pour générer les terrains, un format texte est utilisé. Il est décodé dans la vue pour en faire un objet map. Pour que le jeu soit opérant, il faut que chacun ait les mêmes fichiers. Aucune vérification n'est imposée donc il est tout à fait possible qu'un joueur rejoigne une partie avec un fichier de terrain différent, à ses risques et périls.
 \subsection{Protocole réalisé}
 
 \subsection{Implémentation du mode multijoueur}
