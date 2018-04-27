@@ -34,8 +34,8 @@ Si ceux-ci ne fonctionnent pas, remplacer python3 par python. Sinon, vérifier q
 
 Pour démarrer un serveur manuellement ou en rejoindre un, les commandes de base fonctionnent : 
 \begin{lstlisting}[language=bash]
-  $ python bomber_server.py {port} {map_path}
-  $ python bomber_client.py {host} {port} {username}
+  $ python3 bomber_server.py {port} {map_path}
+  $ python3 bomber_client.py {host} {port} {username}
 \end{lstlisting}
 
 Attention cependant, pour que le téléporteur fonctionne, il est nécessaire d'utiliser les ports 7777 et 7778.
@@ -113,8 +113,18 @@ Le serveur dispose de ses propres commandes afin communiquer avec les clients :\
 \subsection{Bugs et résolution de bugs}
 
 \subsection{Ajout de bonus}
+Pour que le jeu soit plus intéressant / jouable, nous avons rajouté l'affichage de la vie en haut à gauche de l'écran. L'image de coeur est un simple pixel art et le texte est écrit avec un module de pygame.
+\\
+
+Nous avons également rajouté un teleporteur comme proposé. Le téléporteur est une nouvelle case représentée par le chiffre 3 dans le fichier de terrain, et par une version violette de la case "départ" disponible dans les fichiers image. Lorsqu'un joueur se déplace dessus, il demande au serveur de lui transmettre une nouvelle adresse et un nouveau port, où il va s'auto transférer. La faille du point de vue gameplay est qu'un client malicieux peut envoyer ces requêtes quand il le veut. Ce qui rend cette faille importante est que le joueur peut décider de ses caractéristiques (apparence et points de vie), mais cela a rendu l'implémentation plus simple.
+\\
+
+Dans cette implémentation, on conserve facilement les attributs du joueur et si le code n'est pas modifié, cela marche très bien. Si nous voulons tout de même corriger cela, nous l'aurions fait de manière à ce que ce soit le serveur qui communique avec l'autre serveur à propos des caractéristiques du joueur. Il aurait fallu, cependant, faire en sorte que personne ne se fasse passer pour le serveur et pour cela on peut penser à un système de clés publiques clés privées, puis un dictionnaire de serveurs de confiance ... Mais pour ce projet il ne nous semblait pas utile d'aller aussi loin.
 \newpage
 
 \section{Bilan}
+Réaliser ce projet fut une expérience enrichissante qui nous a permis de réfléchir à des problématiques à côté desquelles nous passons souvent à côté lorsque nous développons des applications en standalone. Il fut également l'occasion de mettre en pratique par nous même des principes vus lors du semestre de Réseau.
+\\
 
+Le résultat que nous avons fourni nous satisfait et nous sentons que si une demande de nouvelle fonctionnalités surgissait, ce ne serait pas à contre coeur que nous nous remettrions à travailler dessus, même si il fallait pour cela revenir sur la majorité du code. En attendant, nous avons eu le plaisir de tester ce jeu auquel nous avons rajouté la dimension multijoueur depuis un environnement local, à distance sur un ordinateur personnel puis sur un vrai serveur, afin de constater qu'il est pleinement opérationnel et jouable.
 \end{document}
