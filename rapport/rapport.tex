@@ -74,26 +74,25 @@ Pour son interface graphique, ce jeu utilise pygame qui est une librairie libre 
 
 Pour générer les terrains, un format texte est utilisé. Il est décodé dans la vue pour en faire un objet map. Pour que le jeu soit opérant, il faut que chacun ait les mêmes fichiers. Aucune vérification n'est imposée donc il est tout à fait possible qu'un joueur rejoigne une partie avec un fichier de terrain différent, à ses risques et périls.
 \subsection{Protocole réalisé}
-Afin que la communication s'effectue correctement, nous avons mis un point un protocole simple.
-Ce protocole se situe au niveau des couches 7 et 6 du modèle OSI, c'est à dire la couche application et la couche présentation. Pour le transport, nous utilisons la couche TCP, pour être sure que les données soient arrivée à destination.
+Afin que la communication s'effectue correctement, nous avons mis au point un protocole simple.
+Ce protocole se situe au niveau des couches 7 et 6 du modèle OSI, c'est à dire la couche application et la couche présentation. Pour le transport, nous utilisons la couche TCP, pour être sur que les données soient arrivées à destination.
 \\
+
 Pour la partie présentation du protocole, il faut respecter ce format:\\
 \begin{lstlisting}
 BEGIN <size> <data>
 \end{lstlisting}
-Size étant la taille de message, que nous avons arbitrairement limité à 5 bits,
-data le message à envoyer.
-Le tout doit être encodé en utf-8.
-\\
-Pour communiquer avec le serveur, le client dispose de différentes commandes à sa disposition.\\
+Size étant la taille de message, que nous avons arbitrairement limité à 5 octets, data le message à envoyer. Le tout doit être encodé en utf-8.
+\newpage
+Pour communiquer avec le serveur, le client dispose de différentes commandes à envoyer au serveur.\\
 \begin{description}
 \item[JOIN <nickname>] Permet de rejoindre le serveur avec un pseudonyme.
-\item[QUIT] Permet d'annoncer que l'on quitte le serveur.
-\item[DROP] Permet de lancer une bombe.
-\item[MOVE <up/down/left/right>] Permet de bouger son personnage sur le serveur.
 \item[JOSP <healt> <kind> <nickname>] Permet de rejoindre un serveur en précisant le niveau de vie, le type de personnage et le pseudonyme. Sert pour la téléportation.
+\item[MOVE <up/down/left/right>] Permet de bouger son personnage sur le serveur.
+\item[DROP] Permet de lancer une bombe.
+\item[QUIT] Permet d'annoncer que l'on quitte le serveur.
 \end{description}
-Le serveur dispose de ses propres commandes afin communiquer avec les clients :\\
+Le serveur dispose de ses propres commandes afin de communiquer avec les clients :\\
 \begin{description}
 \item[WELC <nick> <healt> <kind> <x> <y>] Donne au joueur ses informations tels que son type, sa vie, et (x, y) ses coordonnées de départ dans le jeu.
 \item[NEWP <nickname> <healt> <kind> <x> <y>] Indique au client la création d'un joueur avec healt points de vie, de type kind, à la position (x, y)
@@ -103,9 +102,8 @@ Le serveur dispose de ses propres commandes afin communiquer avec les clients :\
 \item[DROP <nickname>] Indique que le joueur <nickname> a posé une bombe.
 \item[SERVDROP <x> <y>] Indique que le serveur à posé une bombe à la position (x, y)
 \item[TPSP <host> <port>] Indique au client qu'il doit se connecter au serveur <host> sur le port <port>
-
 \end{description}
-
+\newpage
 \subsection{Implémentation du mode multijoueur}
 
 La majeure partie du projet se déroule dans cette implémentation ; Le client et le serveur disposent chacun d'un controleur différent. Pour dialoguer, ils utilisent le protocole décrit dans la partie précédente. Les commandes reçues et envoyées sont généralement composées d'un mot-clé et de paramètres, ce qui va permettre au receveur de la décomposer puis d'appeller la méthode appropriée.
@@ -125,7 +123,7 @@ Le jeu se déroule donc avec chaque partie gérant le modèle de leur côté, su
 Pour que le jeu soit plus intéressant / jouable, nous avons rajouté l'affichage de la vie en haut à gauche de l'écran. L'image de coeur est un simple pixel art et le texte est écrit avec un module de pygame. Nous avons également rajouté l'apparition de bombes aléatoirement sur le terrain, pour ajouter un peu de difficulté. 
 \\
 
-Nous avons également rajouté un teleporteur comme proposé. Le téléporteur est une nouvelle case représentée par le chiffre 3 dans le fichier de terrain, et par une version violette de la case "départ" disponible dans les fichiers image. Lorsqu'un joueur se déplace dessus, il demande au serveur de lui transmettre une nouvelle adresse et un nouveau port, où il va s'auto transférer. La faille du point de vue gameplay est qu'un client malicieux peut envoyer ces requêtes quand il le veut. Ce qui rend cette faille importante est que le joueur peut décider de ses caractéristiques (apparence et points de vie), mais cela a rendu l'implémentation plus simple.
+Nous avons également rajouté un teleporteur comme proposé. Le téléporteur est une nouvelle case représentée par le chiffre 3 dans le fichier de terrain, et par une version violette de la case "départ" disponible dans les fichiers image. Lorsqu'un joueur se déplace dessus, il le serveur lui transmet une nouvelle adresse et un nouveau port, où il va ensuite s'auto transférer. La faille du point de vue gameplay est qu'un client malicieux peut envoyer ces requêtes quand il le veut. Ce qui rend cette faille importante est que le joueur peut décider de ses caractéristiques (apparence et points de vie), mais cela a rendu l'implémentation plus simple.
 \\
 
 Dans cette implémentation, on conserve facilement les attributs du joueur et si le code n'est pas modifié, cela marche très bien. Si nous voulons tout de même corriger cela, nous l'aurions fait de manière à ce que ce soit le serveur qui communique avec l'autre serveur à propos des caractéristiques du joueur. Il aurait fallu, cependant, faire en sorte que personne ne se fasse passer pour le serveur et pour cela on peut penser à un système de clés publiques clés privées, puis un dictionnaire de serveurs de confiance ... Mais pour ce projet il ne nous semblait pas utile d'aller aussi loin.
