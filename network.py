@@ -43,7 +43,6 @@ class NetworkServerController:
                 print("REC :", message)
 
 
-
                 if message != None:
                     user = self.uid_from_socket(s)
                     # Handle user command
@@ -286,10 +285,18 @@ class NetworkClientController:
         taille = "%5d "%(len(message) + 1)
         to_send = "BEGIN " + taille + message + "\n"
         print("SENDING :", to_send)
-        self.server.send(to_send.encode())
+        try:
+            self.server.send(to_send.encode())
+        except:
+            print("Server unreachable")
+            exit()
 
     def receive_message(self):
-        message = self.server.recv(6)
+        try:
+            message = self.server.recv(6)
+        except:
+            print("Caught socket error.")
+            return None
 
         if message.decode() == "BEGIN ":
             taille = self.server.recv(6)
