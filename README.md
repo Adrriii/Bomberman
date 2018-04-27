@@ -27,11 +27,11 @@ To start the server:
 ```
 
 
-You can use teleportation only with the first server on port 7777, and seconds on 7778.
+You can use teleportation only with the a server on port 7777, and an other on 7778.
 By default, the map "maps/map0" is used, but you can generate you own map (*mymap*) and use it as follows:
 
 ```
-  $ ./bomber.py maps/mymap
+  $ ./bomber_server.py <port> maps/mymap
 ```
 
 To start the game:
