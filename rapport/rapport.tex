@@ -261,6 +261,9 @@ Nous avions aussi une erreur du côté du serveur, le serveur restait bloqué da
 
 Nous avions également un problème avec la vie des joueurs. Quand on transmettais à un nouvel arrivant des personnages déjà présent à ajouter à son model, nous ne donnions pas la vie de ces joueurs. Le nouveau client leur donnait automatiquement 50 points de vies.\\
 
+Lorsque nous avons voulu tester le jeu sur un serveur, nous n'arrivions pas à nous connecter depuis nos machines personnelles. La solution fut de remplacer AF_INET6 par AF_INET.
+Après recherche, nous nous sommes aperçu que AF_INET6 est pour les adresses IPV6, il est donc normal d'avoir un dysfonctionnement avec une adresse IPV4.
+
 \subsection{Ajout de bonus}
 Pour que le jeu soit plus intéressant / jouable, nous avons rajouté l'affichage de la vie en haut à gauche de l'écran. L'image de coeur est un simple pixel art et le texte est écrit avec un module de pygame. Nous avons également rajouté l'apparition de bombes aléatoirement sur le terrain, pour ajouter un peu de difficulté. 
 \\
