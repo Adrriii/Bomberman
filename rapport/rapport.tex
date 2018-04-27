@@ -30,6 +30,7 @@ Des scripts sont à disposition pour tester les mécanismes de ce projet:
   $ ./run_servers.sh
   $ ./run_players.sh
 \end{lstlisting}
+Si ceux-ci ne fonctionnent pas, remplacer python3 par python. Sinon, vérifier que pygame est bien installé.
 
 Pour démarrer un serveur manuellement ou en rejoindre un, les commandes de base fonctionnent : 
 \begin{lstlisting}[language=bash]
@@ -39,7 +40,8 @@ Pour démarrer un serveur manuellement ou en rejoindre un, les commandes de base
 
 Attention cependant, pour que le téléporteur fonctionne, il est nécessaire d'utiliser les ports 7777 et 7778.
 \subsection{Fonctionnalités}
-Une fois connecté, un cadre rouge permet d'identifier le personnage contrôlé. Une immunité de 5 secondes est accordée au nouveaux venus. Chaque explosion retire 10 point de vie. Chaque fruit mangé en rend 10. Les points de vie du joueur sont visibles en haut à gauche de l'écran. Le pavé directionnel permet de déplacer le personnage dans le jeu. Appuyer sur espace permet de poser une bombe à l'emplacement du joueur. Il y a un délai de 2 secondes avant de pouvoir poser une autre bombe.
+Une fois connecté, un cadre rouge permet d'identifier le personnage contrôlé. Une immunité de 5 secondes est accordée au nouveaux venus. Chaque explosion retire 10 point de vie et chaque fruit mangé en rend 10. Les points de vie du joueur sont visibles en haut à gauche de l'écran et le pavé directionnel permet de déplacer le personnage dans le jeu. Appuyer sur espace permet de poser une bombe à l'emplacement du joueur (il y a un délai de 2 secondes avant de pouvoir poser une autre bombe).
+\newpage
 Une case particulière, représentée en violet dans le jeu, permet de se téléporter vers une autre serveur.
 Dans le cas où cet autre serveur ne serait pas accessible, la téléportation ne se fait pas.
 Des bombes apparaissent aléatoirement sur le terrain, afin d'augmenter la difficulté.
