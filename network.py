@@ -220,9 +220,9 @@ class NetworkServerController:
         # We can change the server depending in the teleporter tile
         # This would require a teleporter object in the model
         if self.port == 7777:
-            self.send_message("TPSP 79.94.128.194 7778",s)
+            self.send_message("TPSP localhost 7778",s)
         elif self.port == 7778:
-            self.send_message("TPSP 79.94.128.194 7777",s)
+            self.send_message("TPSP localhost 7777",s)
 
     def kill_user(self,user,s):
         # Tell the model to remove the user
