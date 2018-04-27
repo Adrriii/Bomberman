@@ -27,7 +27,7 @@ To start the server:
 ```
 
 
-You can use teleportation only with the a server on port 7777, and an other on 7778.
+You can use teleportation only with a server on the port 7777, and another on 7778. If needed you can customize the ports and adresses in network.py
 By default, the map "maps/map0" is used, but you can generate you own map (*mymap*) and use it as follows:
 
 ```
