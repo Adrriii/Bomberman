@@ -2,7 +2,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[francais]{babel}
-\usepackage{algorithm2e}
+\usepackage{listings}
 
 \title{Rapport groupe TM7B}
 
@@ -17,12 +17,28 @@
 \newpage
 
 \section{Introduction}
-\newpage
+Pour réaliser ce projet, nous nous sommes beaucoup appuyé à la fois sur le jeu existant, sur son architecture et sur le code du serveur IRC précédemment réalisé en TP. Dans ce rapport nous allons présenter le travail effectué, les méthodes utilisées, le résultat produit ainsi que les possibles améliorations.
 
 \section{Vue d'ensemble fonctionnelle}
 
+Cette section est destinée aux potentiels utilisateurs afin de présenter le projet, guider l'utilisation et alerter des problèmes connus.
+
 \subsection{Utilisation}
 
+Des scripts sont à disposition pour tester les mécanismes de ce projet:
+\begin{lstlisting}[language=bash]
+  $ ./run_servers.sh
+  $ ./play_1.sh
+  $ ./play_2.sh
+\end{lstlisting}
+
+Pour démarrer un serveur manuellement ou en rejoindre un, les commandes de base fonctionnent : 
+\begin{lstlisting}[language=bash]
+  $ python bomber_server.py {port} {map_path}
+  $ python bomber_client.py {host} {port} {username}
+\end{lstlisting}
+
+Attention cependant, pour que le téléporteur fonctionne, il est nécessaire d'utiliser les ports 7777 et 7778.
 \subsection{Fonctionnalités}
 
 \subsection{Problèmes connus}
@@ -30,6 +46,8 @@
 
 \section{Architecture et Implémentation}
 \subsection{Étude du modèle existant}
+
+\subsection{Protocole réalisé}
 
 \subsection{Implémentation du mode multijoueur}
 
