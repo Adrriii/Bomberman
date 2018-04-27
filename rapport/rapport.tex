@@ -71,6 +71,16 @@ Pour son interface graphique, ce jeu utilise pygame qui est une librairie libre 
 
 Pour générer les terrains, un format texte est utilisé. Il est décodé dans la vue pour en faire un objet map. Pour que le jeu soit opérant, il faut que chacun ait les mêmes fichiers. Aucune vérification n'est imposée donc il est tout à fait possible qu'un joueur rejoigne une partie avec un fichier de terrain différent, à ses risques et périls.
 \subsection{Protocole réalisé}
+Afin que la communication s'effectue correctement, nous avons mis un point un protocole simple.
+Ce protocole se situe au niveau des couches 7 et 6 du modèle OSI, c'est à dire la couche application et la couche présentation. Pour le transport, nous utilisons la couche TCP, pour être sure que les données soient arrivée à destination.
+\\
+Pour la partie présentation, il faut respecter ce format:\\
+\begin{lstlisting}
+BEGIN <size> <data>
+\end{lstlisting}
+Size étant la taille de message, que nous avons arbitrairement limité à 5 bits,
+data le message à envoyer.
+Le tout doit être encodé en utf-8.
 
 \subsection{Implémentation du mode multijoueur}
 
