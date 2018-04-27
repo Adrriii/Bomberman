@@ -30,6 +30,7 @@ Des scripts sont à disposition pour tester les mécanismes de ce projet:
   $ ./run_servers.sh
   $ ./run_players.sh
 \end{lstlisting}
+Si ceux-ci ne fonctionnent pas, remplacer python3 par python. Sinon, vérifier que pygame est bien installé.
 
 Pour démarrer un serveur manuellement ou en rejoindre un, les commandes de base fonctionnent : 
 \begin{lstlisting}[language=bash]
@@ -39,24 +40,26 @@ Pour démarrer un serveur manuellement ou en rejoindre un, les commandes de base
 
 Attention cependant, pour que le téléporteur fonctionne, il est nécessaire d'utiliser les ports 7777 et 7778.
 \subsection{Fonctionnalités}
-Une fois connecté, un cadre rouge permet d'identifier le personnage contrôlé. Une immunité temporaire est accordée au nouveaux venus. Chaque explosion retire 10 point de vie. Chaque fruit mangé en rend 10. Les points de vie du joueur sont visibles en haut à gauche de l'écran. Le pavé directionnel permet de déplacer le personnage dans le jeu. Appuyer sur espace permet de poser une bombe à l'emplacement du joueur. Il y a un délai pour pouvoir poser une autre bombe.
-Une case particulière, représentée en rose dans le jeu, permet de se téléporter vers une autre serveur.
-Dans le cas où cet autre serveur ne serai pas accessible, la téléportation ne se fait pas.
-Des bombes apparaissent aléatoirement sur le jeu, afin d'augmenter la difficulté.
+Une fois connecté, un cadre rouge permet d'identifier le personnage contrôlé. Une immunité de 5 secondes est accordée au nouveaux venus. Chaque explosion retire 10 point de vie et chaque fruit mangé en rend 10. Les points de vie du joueur sont visibles en haut à gauche de l'écran et le pavé directionnel permet de déplacer le personnage dans le jeu. Appuyer sur espace permet de poser une bombe à l'emplacement du joueur (il y a un délai de 2 secondes avant de pouvoir poser une autre bombe).
+\newpage
+Une case particulière, représentée en violet dans le jeu, permet de se téléporter vers une autre serveur.
+Dans le cas où cet autre serveur ne serait pas accessible, la téléportation ne se fait pas.
+Des bombes apparaissent aléatoirement sur le terrain, afin d'augmenter la difficulté.
 
 \subsection{Problèmes connus}
-Malgré nos efforts, quelque problèmes persistent, et quelques fonctionnalités manquent.\\
-Au lancement du jeu, aucune vérification n'est faite afin de vérifier que la grille de jeu soit correcte.\\
-En case de déconnexion du serveur, les client sont fermés. Il n'y a pas de mécanisme permettant de relancer le jeu.
-Par contre, si les joueurs ont utilisés un téléporteur et se trouvent du bon côté, il peuvent continuer à jouer. Le téléporteur ne fonctionnera tout simplement plus.
+Malgré nos efforts, quelque problèmes persistent.\\
+Au lancement du jeu, aucune vérification n'est faite afin de vérifier que la grille de jeu corresponde à celle du serveur. Nous avons pensé à effectuer une verification de l'intégrité du fichier du terrain puis dans le cas d'un echec à son remplacement, mais cela semblait un peu en dehors des attentes.
 \\
-Au cours de développement, il nous est arrivé de rencontré quelques fonctionnements anormaux, mais impossible à reproduire.\\
-Par exemple, il est arrivé une fois que les points de vies d'un joueur soient différents de 10 unités entre les clients et le serveur. Nous n'avons pas réussis à reproduire cet effet.\\
-Ainsi nous ne pouvons que spéculer sur la nature du dysfonctionnement.
-Il se pourrait qu'un joueur arrive à esquiver une bombe juste avant son explosion.\\
-Mais, avec une latence élevée, il se peut qu'au moment de l'explosion, les autres clients n'aient pas reçu le mouvement du joueur.\\
-Il en découlerai alors un décalage de point de vie.
-La solution envisagé est alors d'avoir tous les clients esclaves du serveur, qui imposerait le statut du jeu et des joueurs. Mais cette solution impliquait une refonte importante du modèle, afin qu'il soit différent pour les joueurs et les serveurs.
+
+En cas de déconnexion du serveur, les clients sont immédiatement fermés. Il n'y a pas de mécanisme permettant de relancer le jeu automatiquement, ou de reprendre la partie.
+Par contre, si les joueurs ont utilisé un téléporteur et se trouvent sur un serveur qui n'a pas fermé, il peuvent continuer à jouer. Le téléporteur ne fonctionnera tout simplement plus tant que l'autre serveur ne sera pas à nouveau disponible.
+\\
+
+Au cours de développement, il nous est arrivé de rencontrer quelques fonctionnements anormaux, mais impossible de les reproduire.\\
+Par exemple, il est arrivé une fois que les points de vies d'un joueur soient différents de 10 unités entre les clients et le serveur. Nous n'avons pas réussi à reproduire cet effet, nous ne pouvons donc que spéculer sur la nature du dysfonctionnement. \\
+
+L'hypothèse la plus probable est qu'un joueur esquive une bombe in-extremis de son point de vue, mais que son mouvement ne soit pas envoyé au serveur et aux autres clients à temps à cause de la latence.
+La solution envisagée serait que les clients ne décident plus de retirer de la vie aux autres joueurs, mais que ce soit le serveur qui leur en donnent l'indication.
 \newpage
 
 \section{Architecture et Implémentation}
