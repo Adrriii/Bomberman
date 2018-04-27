@@ -22,7 +22,7 @@ class NetworkServerController:
         self.save_sock = {}
 
         # Socket creation
-        sock = socket.socket(socket.AF_INET6,socket.SOCK_STREAM,0)
+        sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM,0)
         try:
             sock.setsockopt(1,socket.SO_REUSEADDR,1024) # for testing
         except:
@@ -77,7 +77,7 @@ class NetworkServerController:
                     if s in self.save_sock:
                         user = self.save_sock[s]
                         print(user+" has disconnected.")
-    
+
                         self.kill_user(user,s)
                     else:
                         s.close()
@@ -220,9 +220,9 @@ class NetworkServerController:
         # We can change the server depending in the teleporter tile
         # This would require a teleporter object in the model
         if self.port == 7777:
-            self.send_message("TPSP localhost 7778",s)
+            self.send_message("TPSP 79.94.128.194 7778",s)
         elif self.port == 7778:
-            self.send_message("TPSP localhost 7777",s)
+            self.send_message("TPSP 79.94.128.194 7777",s)
 
     def kill_user(self,user,s):
         # Tell the model to remove the user
@@ -257,7 +257,7 @@ class NetworkClientController:
         self.nickname = nickname
         self.ready = False
 
-        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.host,self.port))
 
         self.server = s
@@ -426,7 +426,7 @@ class NetworkClientController:
         port = message.split(" ")[2].split("\n")[0]
 
         try:
-            s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((address, int(port)))
             s.close()
         except:
@@ -444,7 +444,7 @@ class NetworkClientController:
         self.model.empty_model()
         self.server.close()
 
-        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.host,self.port))
 
         self.server = s

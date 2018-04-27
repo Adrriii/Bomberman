@@ -205,12 +205,13 @@ class Model:
     # kill a character
     def kill_character(self, nickname):
         character = self.look(nickname)
-        if not character:
+        try:
+            self.characters.remove(character)
+            print("=> kill \"{}\"".format(nickname))
+            return True
+        except:
             print("Error: nickname {} not found!".format(nickname))
-            sys.exit(1)
-        self.characters.remove(character)
-        print("=> kill \"{}\"".format(nickname))
-        return True
+            return False
 
     # quit game
     def quit(self, nickname = None):
@@ -232,36 +233,36 @@ class Model:
     # add a new character
     def add_character(self, nickname, isplayer = False, kind = None, pos = None):
         character = self.look(nickname)
-        if character:
+        try:
+            if pos is None: pos = self.map.random()
+            if kind is None: kind = random.choice(CHARACTERS)
+            character = Character(nickname, kind, self.map, pos)
+            print("=> add character \"{}\" ({}) as position ({},{})".format(nickname, CHARACTERS_STR[kind], pos[X], pos[Y]))
+            self.characters.append(character)
+            if isplayer: self.player = character
+        except:
             print("Error: nickname \"{}\" already used!".format(nickname))
-            sys.exit(1)
-        if pos is None: pos = self.map.random()
-        if kind is None: kind = random.choice(CHARACTERS)
-        character = Character(nickname, kind, self.map, pos)
-        print("=> add character \"{}\" ({}) as position ({},{})".format(nickname, CHARACTERS_STR[kind], pos[X], pos[Y]))
-        self.characters.append(character)
-        if isplayer: self.player = character
         return character
 
     # drop a bomb
     def drop_bomb(self, nickname):
         character = self.look(nickname)
-        if not character:
+        try:
+            if character.disarmed == 0:
+                self.bombs.append(Bomb(self.map, character.pos))
+                character.disarmed = DISARMED
+            print("=> drop bomb at position ({},{})".format(character.pos[X], character.pos[Y]))
+        except:
             print("Error: nickname \"{}\" not found!".format(nickname))
-            sys.exit(1)
-        if character.disarmed == 0:
-            self.bombs.append(Bomb(self.map, character.pos))
-            character.disarmed = DISARMED
-        print("=> drop bomb at position ({},{})".format(character.pos[X], character.pos[Y]))
 
     # move a character
     def move_character(self, nickname, direction):
         character = self.look(nickname)
-        if not character:
+        try:
+            character.move(direction)
+            print("=> move {} \"{}\" at position ({},{})".format(DIRECTIONS_STR[direction], nickname, character.pos[X], character.pos[Y]))
+        except:
             print("Error: nickname \"{}\" not found!".format(nickname))
-            sys.exit(1)
-        character.move(direction)
-        print("=> move {} \"{}\" at position ({},{})".format(DIRECTIONS_STR[direction], nickname, character.pos[X], character.pos[Y]))
 
     def empty_model(self):
         self.characters = []
