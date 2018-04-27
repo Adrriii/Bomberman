@@ -122,7 +122,7 @@ Le jeu se déroule donc avec chaque partie gérant le modèle de leur côté, su
 \subsection{Bugs et résolution de bugs}
 
 \subsection{Ajout de bonus}
-Pour que le jeu soit plus intéressant / jouable, nous avons rajouté l'affichage de la vie en haut à gauche de l'écran. L'image de coeur est un simple pixel art et le texte est écrit avec un module de pygame.
+Pour que le jeu soit plus intéressant / jouable, nous avons rajouté l'affichage de la vie en haut à gauche de l'écran. L'image de coeur est un simple pixel art et le texte est écrit avec un module de pygame. Nous avons également rajouté l'apparition de bombes aléatoirement sur le terrain, pour ajouter un peu de difficulté. 
 \\
 
 Nous avons également rajouté un teleporteur comme proposé. Le téléporteur est une nouvelle case représentée par le chiffre 3 dans le fichier de terrain, et par une version violette de la case "départ" disponible dans les fichiers image. Lorsqu'un joueur se déplace dessus, il demande au serveur de lui transmettre une nouvelle adresse et un nouveau port, où il va s'auto transférer. La faille du point de vue gameplay est qu'un client malicieux peut envoyer ces requêtes quand il le veut. Ce qui rend cette faille importante est que le joueur peut décider de ses caractéristiques (apparence et points de vie), mais cela a rendu l'implémentation plus simple.
