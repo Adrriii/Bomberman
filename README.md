@@ -7,12 +7,6 @@ This is a simple "Bomber Man" game written in Python 3, based on the *PyGame* li
 
 ## Download & Install ##
 
-First clone the project available on GitHUB under GPL:
-
-```
-  $ git clone https://github.com/orel33/bomber
-```
-
 To install Python (root privilege required):
 
 ```
@@ -25,21 +19,31 @@ To install the *PyGame* library (user privilege enough):
   $ pip3 install pygame
 ```
 
-To start the game:
+To start the server:
 
 ```
-  $ ./bomber.py
+  $ ./bomber_server.py 7777 maps/map0
+  $ ./bomber_server.py 7778 maps/map1
 ```
 
+
+You can use teleportation only with the first server on port 7777, and seconds on 7778.
 By default, the map "maps/map0" is used, but you can generate you own map (*mymap*) and use it as follows:
 
 ```
   $ ./bomber.py maps/mymap
 ```
 
+To start the game:
+
+```
+  $ ./bomber_client.py <server> <port> <username>
+```
+
+
 ## Rules ##
 
-This game is similar to a classic "Bomber Man". This is a *standalone* version of the game for a single player. In this version, a single character (or player) starts the game with an initial amount of 50 health points. Each fruit brings a character with 10 extra health points, while each bomb blast removes 10 health points. A character is dead when its health points reach zero. A character gets immunity for a while after he's hit by a bomb blast. After a character drops a bomb, he is disarmed for a while.
+This game is similar to a classic "Bomber Man". This is a multiplayer version of the game. In this version, every player starts the game with an initial amount of 50 health points. Each fruit brings a character with 10 extra health points, while each bomb blast removes 10 health points. A character is dead when its health points reach zero. A character gets immunity for a while after he's hit by a bomb blast, or he's join a server . After a character drops a bomb, he is disarmed for a while.
 
 To play, just use the following keys:
   * use *arrows* to move the current character

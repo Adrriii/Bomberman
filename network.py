@@ -74,10 +74,14 @@ class NetworkServerController:
                 else:
                     # Handle disconnection
                     print (self.save_sock)
-                    user = self.save_sock[s]
-                    print(user+" has disconnected.")
-
-                    self.kill_user(user,s)
+                    if s in self.save_sock:
+                        user = self.save_sock[s]
+                        print(user+" has disconnected.")
+    
+                        self.kill_user(user,s)
+                    else:
+                        s.close()
+                        self.sockets.remove(s)
                     continue
 
 
@@ -103,7 +107,7 @@ class NetworkServerController:
         try:
             message = s.recv(6)
         except:
-            print("Caught socket error.")
+            print("Socket error: can't receive data from server.")
             return None
 
         if message.decode() == "BEGIN ":
@@ -112,7 +116,7 @@ class NetworkServerController:
             try:
                 len = int(taille.decode())
             except ValueError:
-                print("Erreur reception, impossible de convertir la taille du message :")
+                print("Value error, can't convert message's size")
                 print(message.decode())
                 return ""
 
@@ -295,7 +299,7 @@ class NetworkClientController:
         try:
             message = self.server.recv(6)
         except:
-            print("Caught socket error.")
+            print("Caught socket error, can't receive data from sevrer.")
             return None
 
         if message.decode() == "BEGIN ":
@@ -304,7 +308,7 @@ class NetworkClientController:
             try:
                 len = int(taille.decode())
             except ValueError:
-                print("Erreur reception, impossible de convertir la taille du message :")
+                print("Value error, can't convert message's size")
                 print(message.decode())
                 return ""
 
@@ -420,6 +424,15 @@ class NetworkClientController:
     def switch_server(self,message):
         address = message.split(" ")[1].split("\n")[0]
         port = message.split(" ")[2].split("\n")[0]
+
+        try:
+            s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            s.connect((address, int(port)))
+            s.close()
+        except:
+            print("TELEPORT ERROR: Second server unreachable...")
+            return
+
         self.host = address
         self.port = int(port)
         self.join_special()
