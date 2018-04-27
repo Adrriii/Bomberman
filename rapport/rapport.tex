@@ -93,7 +93,6 @@ Pour communiquer avec le serveur, le client dispose de différentes commandes à
 \item[MOVE <up/down/left/right>] Permet de bouger son personnage sur le serveur.
 \item[JOSP <healt> <kind> <nickname>] Permet de rejoindre un serveur en précisant le niveau de vie, le type de personnage et le pseudonyme. Sert pour la téléportation.
 \end{description}
-\\
 Le serveur dispose de ses propres commandes afin communiquer avec les clients :\\
 \begin{description}
 \item[WELC <nick> <healt> <kind> <x> <y>] Donne au joueur ses informations tels que son type, sa vie, et (x, y) ses coordonnées de départ dans le jeu.
@@ -107,8 +106,18 @@ Le serveur dispose de ses propres commandes afin communiquer avec les clients :\
 
 \end{description}
 
-
 \subsection{Implémentation du mode multijoueur}
+
+La majeure partie du projet se déroule dans cette implémentation ; Le client et le serveur disposent chacun d'un controleur différent. Pour dialoguer, ils utilisent le protocole décrit dans la partie précédente. Les commandes reçues et envoyées sont généralement composées d'un mot-clé et de paramètres, ce qui va permettre au receveur de la décomposer puis d'appeller la méthode appropriée.
+\\
+
+Lorsqu'un client se connecte à un serveur, il lui envoie uniquement son nom d'utilisateur. Le serveur va générer un personnage, l'ajouter à son modèle, puis répondre par un message de bienvenue qui comprend les caractéristiques du personnage généré. Le serveur va également envoyer une commande à tous les autres clients pour que ceux-ci ajoutent à leur tour le personnage. En cas de nom d'utilisateur déjà utilisé, le client est simplement refusé et affiche le message d'erreur adéquat.
+\\
+
+Lorsqu'un utilisateur appuie sur une touche de déplacement, elle est directement impactée sur son jeu pour plus de fluidité. La commande est ensuite envoyée au serveur, qui va l'interprêter puis prévenir à leur tour les autres clients. Cette méthode ne provoque pas de désynchronisation, car les pertes de paquets sont gérées par TCP. Cela marche également comme ça pour toutes les autres intéractions.
+\\
+
+Le jeu se déroule donc avec chaque partie gérant le modèle de leur côté, suivant les instructions du serveur et leurs propres mouvements. Ce système n'est pas du tout sécurisé car même si le code était compilé, un client peut envoyer toutes les instructions qu'il veut. Il existe notament une faille qui sera expliquée dans la section bonus.
 
 \subsection{Bugs et résolution de bugs}
 
