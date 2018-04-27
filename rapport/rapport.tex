@@ -75,7 +75,9 @@ Pour son interface graphique, ce jeu utilise pygame qui est une librairie libre 
 Pour générer les terrains, un format texte est utilisé. Il est décodé dans la vue pour en faire un objet map. Pour que le jeu soit opérant, il faut que chacun ait les mêmes fichiers. Aucune vérification n'est imposée donc il est tout à fait possible qu'un joueur rejoigne une partie avec un fichier de terrain différent, à ses risques et périls.
 \subsection{Protocole réalisé}
 Afin que la communication s'effectue correctement, nous avons mis au point un protocole simple.
-Ce protocole se situe au niveau des couches 7 et 6 du modèle OSI, c'est à dire la couche application et la couche présentation. Pour le transport, nous utilisons la couche TCP, pour être sur que les données soient arrivées à destination.
+Ce protocole se situe au niveau des couches 7 et 6 du modèle OSI, c'est à dire la couche application et la couche présentation. Pour le transport, nous utilisons le protocole TCP.
+Le protocole UDP ne nous permettais pas d'être sure que les paquets ne se soient pas perdus, se qui aurait impliqué de mettre en place un système pour éviter la désynchronisation des joueurs.
+TCP nous épargnes ses problèmes en gérant le renvoie des paquets perdus.
 \\
 
 Pour la partie présentation du protocole, il faut respecter ce format:\\
@@ -83,6 +85,10 @@ Pour la partie présentation du protocole, il faut respecter ce format:\\
 BEGIN <size> <data>
 \end{lstlisting}
 Size étant la taille de message, que nous avons arbitrairement limité à 5 octets, data le message à envoyer. Le tout doit être encodé en utf-8.
+Ceci nous permet d'avoir une réception non bloquante des données. En effet, nous attendons de recevoir BEGIN, puis la taille, puis ensuite nous recevons la quantité exacte de donnée.
+Avant ce mécanisme, nous avions un système d'acquittement pour éviter les réceptions bloquantes. Le serveur attendait un "OK" du client pour envoyer la suite.
+Mais le client ne pouvait être sure que le serveur avait reçu le OK. Le système avec la taille des données semblait alors plus pratique à mettre en oeuvre.
+
 \newpage
 Pour communiquer avec le serveur, le client dispose de différentes commandes à envoyer au serveur.\\
 \begin{description}
