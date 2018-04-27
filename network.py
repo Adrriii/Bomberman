@@ -52,10 +52,6 @@ class NetworkServerController:
                     if(message.startswith("JOIN ") or message.startswith("JOSP ")):
                         self.changeNickname(s,message)
 
-                    # The user is requesting the server map
-                    if(message.startswith("MAP")):
-                        self.sendMap(s)
-
                     # The user is requesting to move
                     if(message.startswith("MOVE")):
                         self.moveCharacter(s, message)
