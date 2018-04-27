@@ -124,6 +124,11 @@ Lorsqu'un utilisateur appuie sur une touche de déplacement, elle est directemen
 Le jeu se déroule donc avec chaque partie gérant le modèle de leur côté, suivant les instructions du serveur et leurs propres mouvements. Ce système n'est pas du tout sécurisé car même si le code était compilé, un client peut envoyer toutes les instructions qu'il veut. Il existe notament une faille qui sera expliquée dans la section bonus.
 
 \subsection{Bugs et résolution de bugs}
+Durant le développement de ce projet, nous avons rencontrés quelques difficultés. Un des premiers dysfonctionnement était que nous nous retrouvions bloqués à attendre des données qui avaient déjà été envoyées par le serveur. La solution à ce problème à d'abord été la mise en place d'un système d'acquittement, qui fut remplacé par un autre système permettant de connaitre la taille des données à recevoir.
+\\
+Nous avions aussi une erreur du côté du serveur, le serveur restait bloqué dans le select et ne mettais à jour son, model que lorsqu'il recevait les actions d'un joueur. Les explosions de bombes n'étaient bien souvent pas prises en comptes par le serveur. La solution fut de lire la documentation afin de trouver un parametre sous permettant de ne rester qu'un certain lapse de temps dans le select.\\
+
+Nous avions également un problème avec la vie des joueurs. Quand on transmettais à un nouvel arrivant des personnages déjà présent à ajouter à son model, nous ne donnions pas la vie de ces joueurs. Le nouveau client leur donnait automatiquement 50 points de vies.\\
 
 \subsection{Ajout de bonus}
 Pour que le jeu soit plus intéressant / jouable, nous avons rajouté l'affichage de la vie en haut à gauche de l'écran. L'image de coeur est un simple pixel art et le texte est écrit avec un module de pygame. Nous avons également rajouté l'apparition de bombes aléatoirement sur le terrain, pour ajouter un peu de difficulté. 
